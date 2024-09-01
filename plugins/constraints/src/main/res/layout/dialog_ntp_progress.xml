@@ -64,6 +64,8 @@
         tools:progress="50" />
 
     <com.google.android.material.button.MaterialButton
+        app:cornerRadius="8dp"
+        app:strokeColor="@color/colorPrimary"
         style="@style/GrayButton"
         android:id="@+id/stop"
         android:layout_width="wrap_content"

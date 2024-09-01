@@ -55,6 +55,8 @@
                     app:columnCount="2">
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/nav_logsettings"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -70,6 +72,8 @@
                         app:layout_row="0" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/log_send"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -85,6 +89,8 @@
                         app:layout_row="0" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/log_delete"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -133,6 +139,8 @@
                     app:columnCount="2">
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/nav_export"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -148,6 +156,8 @@
                         app:layout_row="0" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/nav_import"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -196,6 +206,8 @@
                     app:columnCount="2">
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/export_csv"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -211,6 +223,8 @@
                         app:layout_row="0" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/nav_reset_aps_results"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -226,6 +240,8 @@
                         app:layout_row="0" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/cleanup_db"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -241,6 +257,8 @@
                         app:layout_row="1" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/nav_resetdb"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
