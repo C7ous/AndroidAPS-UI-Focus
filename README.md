@@ -50,7 +50,8 @@ ui.button_press.xml <br />
 ui.button_bg.xml <br />
 
 ## Animations added:
-Overview: Carbs, Insulin, Loop Dialog, Profile Viewer, TempTarget, Bolus Wizard,
+Overview: <br />
+Carbs, Insulin, Loop Dialog, Profile Viewer, TempTarget, Bolus Wizard
 
 Location: <br />
 /ui/src/main/res/anim/
@@ -70,10 +71,11 @@ wiz_dialog_funnel_down.xml <br />
 wiz_dialog_funnel_up.xml <br />
 
 ## String Changes
-Location:
+Location: <br />
 /core/ui/src/main/res/values/strings/strings.xml <br />
 String change: line 159 <br />
-Changes "overview_insulin_label" to " " since i was unable to fully remove the label with >android:text=" "<  <br />
+Changes "overview_insulin_label" to " " <br />
+since i was unable to fully remove the label with >android:text=" "<  <br />
 
 Location: <br />
 /ui/src/main/res/values/styles/styles.xml <br />
