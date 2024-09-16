@@ -83,7 +83,7 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputEventTitle"
-                android:layout_width="334dp"
+                android:layout_width="356dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:hint="@string/taskname" />
@@ -126,7 +126,7 @@
 
             <TextView
                 android:id="@+id/triggerDescription"
-                android:layout_width="359dp"
+                android:layout_width="366dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
@@ -143,7 +143,7 @@
 
             <TextView
                 android:id="@+id/forcedTriggerDescription"
-                android:layout_width="358dp"
+                android:layout_width="367dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
@@ -158,7 +158,7 @@
                 android:background="?android:attr/dividerHorizontal" />
 
             <RelativeLayout
-                android:layout_width="283dp"
+                android:layout_width="284dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center">
 
@@ -180,13 +180,14 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:background="@drawable/ui_button_states"
                     android:id="@+id/addAction"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
+                    android:layout_marginEnd="0dp"
+                    android:background="@drawable/ui_button_states"
                     android:padding="8dp"
                     android:text="@string/add_short"
                     tools:ignore="RelativeOverlap" />
@@ -195,7 +196,7 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/actionListView"
-                android:layout_width="383dp"
+                android:layout_width="377dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
