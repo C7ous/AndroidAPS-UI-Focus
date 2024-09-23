@@ -6,6 +6,7 @@
 * Overall alignment and centering for dialog objects/items
 
 # UI Changes
+* Overview: Quick on/off Toggle for "Exercise"
 * Overview: Buttons, Alignment, Scaling
 * Overview: Presentation of AutoSense removed "AS: "
 * Automation Dialog: Buttons, Alignment, Centering
