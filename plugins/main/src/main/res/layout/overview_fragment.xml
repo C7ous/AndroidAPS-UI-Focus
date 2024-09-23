@@ -37,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:cardCornerRadius="5dp"
+                    app:cardCornerRadius="6dp"
                     app:cardElevation="0dp"
                     android:layout_gravity="start">
 
@@ -60,7 +60,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    app:cardCornerRadius="8dp"
+                    app:cardCornerRadius="6dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="6dp"
                     android:layout_marginEnd="6dp">
@@ -69,8 +69,6 @@
                         android:id="@+id/exercise_mode_checkbox_icon"
                         android:layout_width="48dp"
                         android:layout_height="match_parent"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginEnd="2dp"
                         android:layout_weight="0"
                         android:background="@color/ribbonDefault"
                         android:contentDescription="@string/enable_exercise_mode"
@@ -83,18 +81,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:cardCornerRadius="5dp"
+                    app:cardCornerRadius="6dp"
                     app:cardElevation="0dp"
                     android:layout_gravity="end">
 
                     <TextView
                         android:id="@+id/temp_target"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_gravity="end"
                         android:layout_weight="1"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginEnd="5dp"
                         android:gravity="center_vertical|center_horizontal"
                         android:paddingTop="6dp"
                         android:paddingBottom="6dp"
