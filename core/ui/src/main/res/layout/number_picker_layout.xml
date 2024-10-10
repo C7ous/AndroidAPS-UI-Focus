@@ -32,6 +32,9 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <ImageButton
+        android:background="@drawable/ui_button_states"
+        android:scaleY="0.7"
+        android:scaleX="0.7"
         android:id="@+id/decrement"
         android:layout_width="40dp"
         android:layout_height="0dp"
@@ -45,6 +48,9 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
+        android:background="@drawable/ui_button_states"
+        android:scaleY="0.7"
+        android:scaleX="0.7"
         android:id="@+id/increment"
         android:layout_width="40dp"
         android:layout_height="0dp"

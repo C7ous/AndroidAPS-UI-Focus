@@ -34,7 +34,7 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:text="@string/overview_insulin_label"
+                android:text="Insulin"
                 android:textAlignment="center"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -48,12 +48,14 @@
             android:padding="5dp" />
 
         <LinearLayout
+            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="5dp">
 
             <CheckBox
+                android:layout_marginBottom="7dp"
                 android:id="@+id/start_eating_soon_tt"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -69,9 +71,12 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_marginStart="5dp"
             android:id="@+id/time_layout"
-            android:layout_width="match_parent"
+            android:layout_width="304dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="7dp"
             android:orientation="horizontal">
 
             <TextView
@@ -106,8 +111,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_width="304dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="7dp"
             android:orientation="horizontal">
 
             <TextView
@@ -117,7 +125,7 @@
                 android:layout_gravity="center_horizontal"
                 android:width="120dp"
                 android:padding="10dp"
-                android:text="@string/overview_insulin_label"
+                android:text="Insulin"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 android:textStyle="bold" />
 
@@ -144,7 +152,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:padding="5dp">
+            android:padding="5dp"
+            android:layout_marginStart="35dp"
+            android:layout_marginEnd="35dp"
+            android:layout_marginTop="7dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/plus05"
@@ -152,7 +163,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                tools:text="+0.5" />
+                tools:text="+0.5"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/plus10"
@@ -160,7 +173,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                tools:text="+1.0" />
+                tools:text="+1.0"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/plus20"
@@ -168,7 +183,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                tools:text="+2.0" />
+                tools:text="+2.0"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"/>
 
         </LinearLayout>
 
