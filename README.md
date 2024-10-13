@@ -4,6 +4,7 @@
 * Scared to cut my fingers, buttons now have round edges
 * Dialog closing/opening for Overview items have a sexy funnel animation
 * Overall alignment and centering for dialog objects/items
+* Nice little toggle for Exercise without having to set a time or fiddling with a dialog
 
 # UI Changes
 * Overview: Quick on/off Toggle for "Exercise"
@@ -89,6 +90,7 @@ Strings Added: line 12 > 40 <br />
 "ProfileViewerFunnelAnimation" <br />
 
 # Preview
+<img src="https://github.com/user-attachments/assets/568a48d7-d831-458b-b84d-d13e9cc622ea" height="222" width="367"> <br />
 
 <img src="https://github.com/user-attachments/assets/190357e9-d5ae-4afa-ae91-60adc3a92e80" height="258" width="367">
 <img src="https://github.com/user-attachments/assets/9045e81f-6fc9-4770-bc45-c4ac33ac40a2" height="343" width="367"> <br />
