@@ -92,7 +92,7 @@ Strings Added: line 12 > 40 <br />
 ## Code Changes
 SMBDefaults.kt: <br />
 Needed code change of function <br />
-"const var exercise_mode =" -> "var exercise_mode =" <br />
+"const val exercise_mode =" -> "var exercise_mode =" <br />
 
 The change breaks the "ActionsFragment.kt Exercise" mode toggle <br />
 Resulting in it no longer toggling "AutoISF exercise mode" enabled or disabled <br />
