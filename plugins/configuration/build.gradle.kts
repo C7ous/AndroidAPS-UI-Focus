@@ -1,7 +1,7 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.ksp)
     id("kotlin-android")
-    id("kotlin-kapt")
     id("kotlin-parcelize")
     id("android-module-dependencies")
     id("test-module-dependencies")
@@ -27,10 +27,10 @@ dependencies {
     testImplementation(project(":shared:tests"))
 
     //WorkManager
-    api(Libs.AndroidX.Work.runtimeKtx)
+    api(libs.androidx.work.runtime)
     // Maintenance
-    api(Libs.AndroidX.gridLayout)
+    api(libs.androidx.gridlayout)
 
-    kapt(Libs.Dagger.compiler)
-    kapt(Libs.Dagger.androidProcessor)
+    ksp(libs.com.google.dagger.compiler)
+    ksp(libs.com.google.dagger.android.processor)
 }
