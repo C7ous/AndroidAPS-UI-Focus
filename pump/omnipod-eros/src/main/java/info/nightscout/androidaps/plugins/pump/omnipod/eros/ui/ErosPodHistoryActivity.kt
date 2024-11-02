@@ -172,19 +172,17 @@ class ErosPodHistoryActivity : TranslatedDaggerAppCompatActivity() {
                     }
 
                     PodHistoryEntryType.INSERT_CANNULA, PodHistoryEntryType.SET_BASAL_SCHEDULE                                                                                                                                                                                                                                                                                                                                                                                                                                                                       -> {
-                        historyEntry.data?.let {
-                            setProfileValue(it, valueView)
+                        if (historyEntry.data != null) {
+                            setProfileValue(historyEntry.data, valueView)
                         }
                     }
 
                     PodHistoryEntryType.SET_BOLUS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    -> {
-                        historyEntry.data?.let {
-                            if (it.contains(";")) {
-                                val splitVal = it.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                                valueView.text = rh.gs(R.string.omnipod_eros_history_bolus_value_with_carbs, java.lang.Double.valueOf(splitVal[0]), java.lang.Double.valueOf(splitVal[1]))
-                            } else {
-                                valueView.text = rh.gs(R.string.omnipod_eros_history_bolus_value, java.lang.Double.valueOf(it))
-                            }
+                        if (historyEntry.data.contains(";")) {
+                            val splitVal = historyEntry.data.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                            valueView.text = rh.gs(R.string.omnipod_eros_history_bolus_value_with_carbs, java.lang.Double.valueOf(splitVal[0]), java.lang.Double.valueOf(splitVal[1]))
+                        } else {
+                            valueView.text = rh.gs(R.string.omnipod_eros_history_bolus_value, java.lang.Double.valueOf(historyEntry.data))
                         }
                     }
 

@@ -1,7 +1,7 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    id("com.android.library")
     id("kotlin-android")
+    id("kotlin-kapt")
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
@@ -29,22 +29,22 @@ dependencies {
     testImplementation(project(":plugins:insulin"))
     testImplementation(project(":shared:tests"))
 
-    api(libs.androidx.appcompat)
-    api(libs.com.google.android.material)
+    api(Libs.AndroidX.appCompat)
+    api(Libs.Google.Android.material)
 
     // Actions
-    api(libs.androidx.gridlayout)
+    api(Libs.AndroidX.gridLayout)
 
     //SmsCommunicator
-    api(libs.com.eatthepath.java.otp)
-    api(libs.com.github.kenglxn.qrgen.android)
+    api(Libs.javaOtp)
+    api(Libs.qrGen)
 
     // Overview
-    api(libs.com.google.android.flexbox)
+    api(Libs.Google.Android.flexbox)
 
     // Food
-    api(libs.androidx.work.runtime)
+    api(Libs.AndroidX.Work.runtimeKtx)
 
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    kapt(Libs.Dagger.compiler)
+    kapt(Libs.Dagger.androidProcessor)
 }

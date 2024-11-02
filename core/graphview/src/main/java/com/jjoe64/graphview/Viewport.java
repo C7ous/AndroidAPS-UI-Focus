@@ -99,7 +99,7 @@ public class Viewport {
             // adjust viewport, labels, etc.
             mGraphView.onDataChanged(true, false);
 
-            mGraphView.postInvalidateOnAnimation();
+            ViewCompat.postInvalidateOnAnimation(mGraphView);
 
             return true;
         }
@@ -140,7 +140,7 @@ public class Viewport {
             // adjust viewport, labels, etc.
             mGraphView.onDataChanged(true, false);
 
-            mGraphView.postInvalidateOnAnimation();
+            ViewCompat.postInvalidateOnAnimation(mGraphView);
         }
     };
 
@@ -158,7 +158,7 @@ public class Viewport {
             mScrollerStartViewport.set(mCurrentViewport);
             // Aborts any active scroll animations and invalidates.
             mScroller.forceFinished(true);
-            mGraphView.postInvalidateOnAnimation();
+            ViewCompat.postInvalidateOnAnimation(mGraphView);
             return true;
         }
 
@@ -740,7 +740,7 @@ public class Viewport {
                 0, maxY,
                 mGraphView.getGraphContentWidth() / 2,
                 mGraphView.getGraphContentHeight() / 2);
-        mGraphView.postInvalidateOnAnimation();
+        ViewCompat.postInvalidateOnAnimation(mGraphView);
     }
 
     /**

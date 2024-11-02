@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
     id("android-module-dependencies")
@@ -23,8 +23,8 @@ dependencies {
     implementation(project(":core:utils"))
     implementation(project(":pump:combov2:comboctl"))
 
-    api(libs.androidx.lifecycle.viewmodel)
-    api(libs.kotlinx.datetime)
+    api(Libs.AndroidX.lifecycleViewmodel)
+    api(Libs.KotlinX.datetime)
 
     // This is necessary to avoid errors like these which otherwise come up often at runtime:
     // "WARNING: Failed to transform class kotlinx/datetime/TimeZone$Companion
@@ -40,9 +40,8 @@ dependencies {
     //
     // Source: https://github.com/mockk/mockk/issues/685#issuecomment-907076353:
     // TODO: Revisit this when upgrading kotlinx-datetime
-    api(platform(libs.kotlinx.serialization.bom))
-    runtimeOnly(libs.kotlinx.serialization.core)
+    runtimeOnly(Libs.KotlinX.serializationCore)
 
-    kapt(libs.com.google.dagger.compiler)
-    kapt(libs.com.google.dagger.android.processor)
+    kapt(Libs.Dagger.compiler)
+    kapt(Libs.Dagger.androidProcessor)
 }

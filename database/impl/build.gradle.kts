@@ -1,8 +1,8 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
-    kotlin("plugin.allopen")
+    id("kotlin-allopen")
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
@@ -25,24 +25,24 @@ android {
 }
 
 dependencies {
-    api(libs.kotlin.stdlib.jdk8)
-    api(libs.kotlin.reflect)
-    api(libs.androidx.core)
+    api(Libs.Kotlin.stdlibJdk8)
+    api(Libs.Kotlin.reflect)
+    api(Libs.AndroidX.core)
 
-    api(libs.io.reactivex.rxjava3.rxandroid)
-    api(libs.io.reactivex.rxjava3.rxkotlin)
+    api(Libs.Rx.rxAndroid)
+    api(Libs.Rx.rxKotlin)
 
-    api(libs.com.google.code.gson)
+    api(Libs.Google.gson)
 
-    api(libs.androidx.room)
-    api(libs.androidx.room.runtime)
-    api(libs.androidx.room.rxjava3)
+    api(Libs.AndroidX.Room.room)
+    api(Libs.AndroidX.Room.runtime)
+    api(Libs.AndroidX.Room.rxJava3)
 
-    api(libs.com.google.dagger.android)
-    api(libs.com.google.dagger.android.support)
+    api(Libs.Dagger.android)
+    api(Libs.Dagger.androidSupport)
 
-    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(Libs.AndroidX.Room.testing)
 
-    kapt(libs.com.google.dagger.compiler)
-    kapt(libs.androidx.room.compiler)
+    kapt(Libs.Dagger.compiler)
+    kapt(Libs.AndroidX.Room.compiler)
 }
