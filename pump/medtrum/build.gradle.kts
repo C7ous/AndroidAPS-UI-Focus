@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
     id("android-module-dependencies")
@@ -28,6 +28,6 @@ dependencies {
     testImplementation(project(":shared:tests"))
     testImplementation(project(":core:objects"))
 
-    kapt(libs.com.google.dagger.compiler)
-    kapt(libs.com.google.dagger.android.processor)
+    kapt(Libs.Dagger.compiler)
+    kapt(Libs.Dagger.androidProcessor)
 }

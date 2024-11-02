@@ -29,10 +29,9 @@ enum class JsonKeys(val key: String) {
     DAYNAMEFORMAT("dayNameFormat"),
     MONTHFORMAT("monthFormat"),
     BACKGROUND("background"),       // Background image for textView
-    LEFTOFFSET("leftOffset"),       // Boolean allow left offset according to dynData value or key for LeftOffset Range definition
-    TOPOFFSET("topOffset"),         // Boolean allow top offset according to dynData value or key for TopOffset Range definition
-    ROTATIONOFFSET("rotationOffset"),// Boolean allow rotation offset according to dynData value or key for rotation Offset Range definition
-    DYNVALUE("dynValue"),           // Boolean allow replacement of text value by dynData value or key for dynValue Range definition
+    LEFTOFFSET("leftOffset"),
+    TOPOFFSET("topOffset"),
+    ROTATIONOFFSET("rotationOffset"),
     DYNDATA("dynData"),             //Bloc of DynDatas definition, and DynData keyValue within view
     VALUEKEY("valueKey"),           // Indentify which value (default is View Value)
     MINDATA("minData"),             // Min data Value (default defined for each value, note unit mg/dl for all bg, deltas)
@@ -54,6 +53,5 @@ enum class JsonKeys(val key: String) {
     INVALIDTOPOFFSET("invalidTopOffset"),
     INVALIDLEFTOFFSET("invalidLeftOffset"),
     INVALIDROTATIONOFFSET("invalidRotationOffset"),
-    INVALIDTEXTVALUE("invalidTextvalue"),
     DEFAULT("default")
 }

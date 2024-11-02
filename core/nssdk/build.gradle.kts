@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("com.android.library")
     id("kotlin-android")
     id("kotlinx-serialization")
     id("android-module-dependencies")
@@ -12,22 +12,19 @@ android {
 }
 
 dependencies {
-    api(libs.com.squareup.retrofit2.retrofit)
-    api(libs.com.squareup.retrofit2.adapter.rxjava3)
-    api(libs.com.squareup.retrofit2.converter.gson)
-    api(libs.com.squareup.okhttp3.okhttp)
-    api(libs.com.squareup.okhttp3.logging.interceptor)
-    api(libs.com.google.code.gson)
-    api(libs.net.danlew.android.joda)
-    api(libs.io.reactivex.rxjava3.rxkotlin)
+    api(Libs.Squareup.Retrofit2.retrofit)
+    api(Libs.Squareup.Retrofit2.adapterRxJava3)
+    api(Libs.Squareup.Retrofit2.converterGson)
+    api(Libs.Squareup.Okhttp3.okhttp)
+    api(Libs.Squareup.Okhttp3.loggingInterceptor)
+    api(Libs.Google.gson)
+    api(Libs.jodaTimeAndroid)
+    api(Libs.Rx.rxKotlin)
 
-    api(libs.androidx.core)
-    api(libs.kotlin.stdlib.jdk8)
-
-    api(platform(libs.kotlinx.coroutines.bom))
-    api(libs.kotlinx.coroutines.core)
-    api(libs.kotlinx.coroutines.android)
-    api(libs.kotlinx.coroutines.rx3)
-    api(platform(libs.kotlinx.serialization.bom))
-    api(libs.kotlinx.serialization.protobuf)
+    api(Libs.AndroidX.core)
+    api(Libs.Kotlin.stdlibJdk8)
+    api(Libs.KotlinX.coroutinesCore)
+    api(Libs.KotlinX.coroutinesAndroid)
+    api(Libs.KotlinX.coroutinesRx3)
+    api(Libs.KotlinX.serializationJson)
 }

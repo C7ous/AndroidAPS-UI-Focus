@@ -1,7 +1,7 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    id("com.android.library")
     id("kotlin-android")
+    id("kotlin-kapt")
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
@@ -20,15 +20,15 @@ dependencies {
     implementation(project(":core:keys"))
 
     //Logger
-    api(libs.org.slf4j.api)
-    api(libs.com.github.tony19.logback.android)
+    api(Libs.Logging.slf4jApi)
+    api(Libs.Logging.logbackAndroid)
 
-    api(libs.com.caverock.androidsvg)
+    api(Libs.androidSvg)
 
-    api(libs.io.reactivex.rxjava3.rxandroid)
-    api(libs.net.danlew.android.joda)
+    api(Libs.Rx.rxAndroid)
+    api(Libs.jodaTimeAndroid)
 
-    api(libs.com.google.dagger.android.support)
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    api(Libs.Dagger.androidSupport)
+    kapt(Libs.Dagger.compiler)
+    kapt(Libs.Dagger.androidProcessor)
 }

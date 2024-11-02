@@ -5,12 +5,9 @@ import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.iob.IobCobCalculator
 import app.aaps.core.interfaces.plugin.ActivePlugin
 import app.aaps.core.interfaces.plugin.PluginBase
-import app.aaps.core.interfaces.protection.PasswordCheck
 import app.aaps.core.interfaces.pump.VirtualPump
 import app.aaps.core.interfaces.sync.Tidepool
 import app.aaps.core.keys.BooleanKey
-import app.aaps.core.keys.StringKey
-import app.aaps.core.ui.toast.ToastUtils
 import app.aaps.plugins.constraints.R
 import dagger.android.HasAndroidInjector
 import javax.inject.Inject
@@ -22,8 +19,6 @@ class Objective0(injector: HasAndroidInjector) : Objective(injector, "config", R
     @Inject lateinit var persistenceLayer: PersistenceLayer
     @Inject lateinit var loop: Loop
     @Inject lateinit var iobCobCalculator: IobCobCalculator
-    @Inject lateinit var passwordCheck: PasswordCheck
-
     val tidepoolPlugin get() = activePlugin.getSpecificPluginsListByInterface(Tidepool::class.java).firstOrNull() as Tidepool?
 
     init {
@@ -72,18 +67,5 @@ class Objective0(injector: HasAndroidInjector) : Objective(injector, "config", R
         tasks.add(object : Task(this, app.aaps.core.ui.R.string.activate_profile) {
             override fun isCompleted(): Boolean = persistenceLayer.getEffectiveProfileSwitchActiveAt(dateUtil.now()) != null
         })
-        tasks.add(
-            UITask(this, R.string.verify_master_password, "master_password") { context, task, callback ->
-                if (preferences.get(StringKey.ProtectionMasterPassword) == "") {
-                    ToastUtils.errorToast(context, app.aaps.core.ui.R.string.master_password_not_set)
-                } else {
-                    passwordCheck.queryPassword(context, app.aaps.core.ui.R.string.master_password, StringKey.ProtectionMasterPassword.key,
-                                                ok = {
-                                                    task.answered = true
-                                                    callback.run()
-                                                })
-                }
-            }
-        )
     }
 }

@@ -1,7 +1,7 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("com.android.library")
     id("kotlin-android")
-    kotlin("plugin.allopen")
+    id("kotlin-allopen")
     id("android-module-dependencies")
     id("all-open-dependencies")
     id("test-module-dependencies")
@@ -14,24 +14,24 @@ android {
 
 dependencies {
 
-    api(libs.net.danlew.android.joda)
+    api(Libs.jodaTimeAndroid)
 
     //Firebase
-    api(platform(libs.com.google.firebase.bom))
-    api(libs.com.google.firebase.analytics)
-    api(libs.com.google.firebase.crashlytics)
+    api(platform(Libs.Google.Firebase.firebaseBom))
+    api(Libs.Google.Firebase.analytics)
+    api(Libs.Google.Firebase.crashlytics)
     // StatsActivity not in use now
-    // api(libs.com.google.firebase.messaging)
-    // api(libs.com.google.firebase.auth)
-    // api(libs.com.google.firebase.database)
+    // api(Libs.Google.Firebase.messaging)
+    // api(Libs.Google.Firebase.auth)
+    // api(Libs.Google.Firebase.database)
 
     //CryptoUtil
-    api(libs.com.madgag.spongycastle)
-    api(libs.com.google.crypto.tink)
+    api(Libs.spongycastleCore)
+    api(Libs.Google.tinkAndroid)
 
     //WorkManager
-    api(libs.androidx.work.runtime) // DataWorkerStorage
+    api(Libs.AndroidX.Work.runtimeKtx) // DataWorkerStorage
 
-    api(libs.com.google.dagger.android)
-    api(libs.com.google.dagger.android.support)
+    api(Libs.Dagger.android)
+    api(Libs.Dagger.androidSupport)
 }

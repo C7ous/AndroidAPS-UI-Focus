@@ -1,6 +1,6 @@
 plugins {
     id("com.android.library")
-    kotlin("plugin.allopen")
+    id("kotlin-allopen")
 }
 
 allOpen {

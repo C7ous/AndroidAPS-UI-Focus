@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("com.android.library")
     id("kotlin-android")
     id("kotlin-parcelize")
     id("kotlinx-serialization")
@@ -20,17 +20,16 @@ dependencies {
     implementation(project(":core:data"))
 
 
-    api(libs.androidx.appcompat)
-    api(libs.androidx.preference)
+    api(Libs.AndroidX.appCompat)
+    api(Libs.AndroidX.preference)
 
-    api(platform(libs.kotlinx.serialization.bom))
-    api(libs.kotlinx.serialization.json)
-    api(libs.kotlinx.serialization.protobuf)
+    api(Libs.KotlinX.serializationJson)
+    api(Libs.KotlinX.serializationProtobuf)
 
-    api(libs.org.apache.commons.lang3)
-    api(libs.net.danlew.android.joda)
+    api(Libs.Apache.commonsLang3)
+    api(Libs.jodaTimeAndroid)
 
     //RxBus
-    api(libs.io.reactivex.rxjava3.rxkotlin)
-    testImplementation(libs.io.reactivex.rxjava3.rxandroid)
+    api(Libs.Rx.rxKotlin)
+    testImplementation(Libs.Rx.rxAndroid)
 }
