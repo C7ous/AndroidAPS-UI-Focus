@@ -133,49 +133,62 @@ class AndroidPermissionImpl @Inject constructor(
     }
 
     @Synchronized override fun notifyForStoragePermission(activity: FragmentActivity) {
-        if (permissionNotGranted(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+        if (permissionNotGranted(activity, Manifest.permission.READ_EXTERNAL_STORAGE))
             activePlugin.activeOverview.addNotification(
                 id = Notification.PERMISSION_STORAGE,
                 text = rh.gs(R.string.need_storage_permission),
                 level = Notification.URGENT,
                 actionButtonId = R.string.request
-            ) { askForPermission(activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)) }
+            ) { askForPermission(activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) }
         else activePlugin.activeOverview.dismissNotification(Notification.PERMISSION_STORAGE)
     }
 
     @Synchronized override fun notifyForLocationPermissions(activity: FragmentActivity) {
-        if (permissionNotGranted(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (permissionNotGranted(activity, Manifest.permission.ACCESS_FINE_LOCATION) ||
+            permissionNotGranted(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        ) {
             activePlugin.activeOverview.addNotification(
                 id = Notification.PERMISSION_LOCATION,
                 text = rh.gs(R.string.need_location_permission),
                 level = Notification.URGENT,
                 actionButtonId = R.string.request
-            ) { askForPermission(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)) }
+            ) {
+                askForPermission(
+                    activity, arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        } else if (permissionNotGranted(activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+            activePlugin.activeOverview.addNotification(
+                id = Notification.PERMISSION_LOCATION,
+                text = rh.gs(R.string.need_background_location_permission),
+                level = Notification.URGENT,
+                actionButtonId = R.string.request
+            ) {
+                askForPermission(activity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+            }
         } else activePlugin.activeOverview.dismissNotification(Notification.PERMISSION_LOCATION)
     }
 
     @Synchronized override fun notifyForSystemWindowPermissions(activity: FragmentActivity) {
         // Check if Android Q or higher
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-            if (!Settings.canDrawOverlays(activity))
-                activePlugin.activeOverview.addNotification(
-                    id = Notification.PERMISSION_SYSTEM_WINDOW,
-                    text = rh.gs(R.string.need_location_permission),
-                    level = Notification.URGENT,
-                    actionButtonId = R.string.request
-                ) {
-                    // Check if Android Q or higher
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                        // Show alert dialog to the user saying a separate permission is needed
-                        // Launch the settings activity if the user prefers
-                        val intent = Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:" + activity.packageName)
-                        )
-                        activity.startActivity(intent)
-                    }
-                }
-            else activePlugin.activeOverview.dismissNotification(Notification.PERMISSION_SYSTEM_WINDOW)
-        }
+        if (!Settings.canDrawOverlays(activity))
+            activePlugin.activeOverview.addNotification(
+                id = Notification.PERMISSION_SYSTEM_WINDOW,
+                text = rh.gs(R.string.need_location_permission),
+                level = Notification.URGENT,
+                actionButtonId = R.string.request
+            ) {
+                // Show alert dialog to the user saying a separate permission is needed
+                // Launch the settings activity if the user prefers
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + activity.packageName)
+                )
+                activity.startActivity(intent)
+            }
+        else activePlugin.activeOverview.dismissNotification(Notification.PERMISSION_SYSTEM_WINDOW)
     }
 }

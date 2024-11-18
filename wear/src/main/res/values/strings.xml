@@ -11,6 +11,7 @@
     <string name="label_actions_tile">AAPS(Actions)</string>
     <string name="label_temp_target_tile">AAPS(Temp Target)</string>
     <string name="label_quick_wizard_tile">AAPS(Quick Wizard)</string>
+    <string name="label_user_action_tile">AAPS(User Action)</string>
     <string name="label_warning_sync">No data!</string>
     <string name="label_warning_old">Old data!</string>
     <string name="label_warning_since">Since %1$s</string>
@@ -98,6 +99,7 @@
     <string name="action_duration">Duration</string>
     <string name="action_tempt_confirmation">Temp Target Requested</string>
     <string name="action_quick_wizard_confirmation">Quick Wizard Requested</string>
+    <string name="action_user_action_confirmation">User Action Requested</string>
     <string name="action_treatment_confirmation">Treatment Requested</string>
     <string name="action_bolus_confirmation">Bolus Requested</string>
     <string name="action_wizard_confirmation">Calculation Requested</string>
@@ -156,6 +158,7 @@
     <string name="pref_simplify_ui_sum">Only show time and BG</string>
     <string name="pref_vibrate_hourly">Vibrate hourly</string>
     <string name="pref_show_weeknumber">Show Week number</string>
+    <string name="pref_include_external">Include external views in template</string>
     <string name="custom_pref_show_seconds">Show seconds</string>
     <string name="digitalstyle_pref_your_style">Your style:</string>
     <string name="digitalstyle_style_none">no style</string>
@@ -189,6 +192,7 @@
     <string name="key_treatments_safety_max_carbs" translatable="false">treatmentssafety_maxcarbs</string>
     <string name="key_treatments_safety_max_bolus" translatable="false">treatmentssafety_maxbolus</string>
     <string name="key_quick_wizard_data" translatable="false">quick_wizard_data</string>
+    <string name="key_user_action_data" translatable="false">user_action_data</string>
     <string name="key_prime_fill" translatable="false">primefill</string>
     <string name="key_show_wizard" translatable="false">showWizard</string>
     <string name="key_single_target" translatable="false">singletarget</string>
@@ -237,6 +241,7 @@
     <string name="key_high_color" translatable="false">highcolor</string>
     <string name="key_mid_color" translatable="false">midcolor</string>
     <string name="key_low_color" translatable="false">lowcolor</string>
+    <string name="key_include_external" translatable="false">include_external</string>
     <string name="increment">increment</string>
     <string name="decrement">decrement</string>
     <string name="abbreviation_average">avg</string>

@@ -113,7 +113,6 @@
     <string name="bg_label">KŞ</string>
     <string name="calibration">Kalibrasyon</string>
     <string name="alarminxmin">Alarmı %1$d dakika içinde çalıştır</string>
-    <string name="treatmentdeliveryerror">Bolus bir hata bildirdi. Gerçek teslim edilen miktarı manuel olarak kontrol edin</string>
     <string name="bolus_reminder">Bolus hatırlatıcısı</string>
     <string name="duration_label">Süre</string>
     <string name="shortgramm">gr</string>
@@ -506,6 +505,8 @@
     <string name="close">Kapat</string>
     <!-- TwoMessagesDialog -->
     <string name="password_preferences_decrypt_prompt">İçe aktarılan tercihlerin şifresini çözmek için gerekli olan ana parola sorulacaktır.</string>
+    <!-- <unattended_export> -->
+    <!-- <unattended_export result messages> -->
     <!-- NumberPicker -->
     <string name="a11y_min_button_description">%2$s\'dan %1$s\'a azalma</string>
     <string name="a11y_plus_button_description">%2$s\'dan %1$s\'a artış</string>

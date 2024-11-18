@@ -62,6 +62,8 @@ enum class BooleanKey(
 
     MaintenanceEnableFabric("enable_fabric2", true, defaultedBySM = true, hideParentScreenIfHidden = true),
 
+    MaintenanceEnableExportSettingsAutomation("enable_unattended_export", false, defaultedBySM = false),
+
     AutotuneAutoSwitchProfile("autotune_auto", false),
     AutotuneCategorizeUamAsBasal("categorize_uam_as_basal", false),
     AutotuneTuneInsulinCurve("autotune_tune_insulin_curve", false),
@@ -109,4 +111,5 @@ enum class BooleanKey(
     WearWizardIob(key = "wearwizard_iob", defaultValue = true, dependency = WearControl, hideParentScreenIfHidden = true),
     WearCustomWatchfaceAuthorization(key = "wear_custom_watchface_autorization", defaultValue = false),
     WearNotifyOnSmb(key = "wear_notifySMB", defaultValue = true),
+    WearBroadcastData(key = "wear_broadcast_data", defaultValue = false),
 }

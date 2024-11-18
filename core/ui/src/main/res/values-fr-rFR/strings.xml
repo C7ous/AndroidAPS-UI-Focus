@@ -113,7 +113,6 @@
     <string name="bg_label">Gly</string>
     <string name="calibration">Étalonnage</string>
     <string name="alarminxmin">Alerter dans %1$d min</string>
-    <string name="treatmentdeliveryerror">Erreur lors du Bolus. Vérifiez manuellement la quantité réellement injectée</string>
     <string name="bolus_reminder">Rappel bolus</string>
     <string name="duration_label">Durée</string>
     <string name="shortgramm">g</string>
@@ -506,6 +505,8 @@
     <string name="close">Fermer</string>
     <!-- TwoMessagesDialog -->
     <string name="password_preferences_decrypt_prompt">Le mot de passe principal vous sera demandé pour décrypter les préférences exportées.</string>
+    <!-- <unattended_export> -->
+    <!-- <unattended_export result messages> -->
     <!-- NumberPicker -->
     <string name="a11y_min_button_description">réduire %1$s par %2$s</string>
     <string name="a11y_plus_button_description">incrémenter %1$s par %2$s</string>

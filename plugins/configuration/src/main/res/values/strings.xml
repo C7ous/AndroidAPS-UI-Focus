@@ -21,6 +21,7 @@
     <string name="permission">Permission</string>
     <string name="need_system_window_permission">Application needs system window permission for notifications</string>
     <string name="need_location_permission">Application needs location permission for BT scan and WiFi identification</string>
+    <string name="need_background_location_permission">Application needs background location permission for automations</string>
     <string name="need_storage_permission">Application needs storage permission to be able store log files and export settings</string>
     <string name="askforpermission">Ask for permission</string>
     <string name="need_whitelisting">%1$s needs battery optimization whitelisting for proper performance</string>
@@ -47,6 +48,8 @@
     <string name="readstatus">Read status</string>
     <string name="data_choices">Data Choices</string>
     <string name="fabric_upload">Fabric Upload</string>
+    <string name="unattended_settings_export">Unattended Settings Export</string>
+    <string name="unattended_settings_export_summary">Enabling this will securely store your password on your phone</string>
     <string name="allow_automated_crash_reporting">Allow automated crash reporting and feature usage data to be sent to the developers via the fabric.io service.</string>
     <string name="summary_email_for_crash_report">This identification will attached to crash reports so we can contact you in urgent cases. It\'s optional.</string>
     <string name="identification">Identification (email, FB or Discord nick etc)</string>
@@ -95,6 +98,8 @@
     <string name="check_preferences_import_btn">Import</string>
     <string name="check_preferences_import_anyway_btn">Import anyway (DANGEROUS!)</string>
     <string name="import_setting">Import settings</string>
+    <string name="aaps_directory">AAPS directory</string>
+    <string name="select_aaps_directory">Select AAPS directory for storing exports, configurations etc.</string>
     <string name="check_preferences_before_import">Please check preferences before importing:</string>
     <string name="check_preferences_cannot_import">Preferences cannot be imported!</string>
     <string name="check_preferences_dangerous_import">Preferences should not be imported!</string>
@@ -105,6 +110,7 @@
     <string name="different_password_used">This file was exported and encrypted with different master password. Provide old master password to decrypt file.</string>
     <string name="master_password_will_be_replaced">As a result of successful import current master password WILL BE REPLACED with that old master password!</string>
     <string name="exported">Preferences exported</string>
+    <string name="exported_failed">Preferences export failed!</string>
     <string name="filenotfound">File not found</string>
     <string name="goto_main_try_again">Please go back to main screen and try again.</string>
     <string name="restartingapp">Exiting application to apply settings.</string>
@@ -160,9 +166,6 @@
 
     <!-- Custom Watchface -->
     <string name="wear_import_custom_watchface_title">Select Custom Watchface</string>
-
-    <!-- Permissions -->
-    <string name="alert_dialog_storage_permission_text">Please reboot your phone or restart AAPS from the System Settings \notherwise Android APS will not have logging (important to track and verify that the algorithms are working correctly)!</string>
 
     <!-- Maintenance -->
     <string name="metadata_label_format">File format</string>
