@@ -56,9 +56,7 @@
                 android:layout_height="64dp"
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
-                android:text="@string/equil_finish"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                android:text="@string/equil_finish"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_delete"
@@ -67,9 +65,7 @@
                 android:layout_height="64dp"
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
-                android:text="@string/delete"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                android:text="@string/delete"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

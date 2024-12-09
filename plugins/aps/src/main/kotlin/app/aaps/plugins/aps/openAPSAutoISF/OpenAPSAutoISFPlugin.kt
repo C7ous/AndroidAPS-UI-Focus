@@ -73,6 +73,7 @@ import app.aaps.plugins.aps.events.EventOpenAPSUpdateGui
 import app.aaps.plugins.aps.events.EventResetOpenAPSGui
 import dagger.android.HasAndroidInjector
 import org.json.JSONObject
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.floor
@@ -111,7 +112,7 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
         .shortName(R.string.autoisf_shortname)
         .preferencesId(PluginDescription.PREFERENCE_SCREEN)
         .preferencesVisibleInSimpleMode(false)
-        .showInList({ config.isEngineeringMode() && config.isDev() })
+        .showInList { config.isEngineeringMode() && config.isDev() }
         .description(R.string.description_auto_isf),
     aapsLogger, rh
 ), APS, PluginConstraints {
@@ -161,17 +162,18 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
 
     override fun supportsDynamicIsf() = true //: Boolean = preferences.get(BooleanKey.ApsUseAutoIsf)
 
-    override fun getIsfMgdl(multiplier: Double, timeShift: Int, caller: String): Double? {
+    override fun getIsfMgdl(profile: Profile, caller: String): Double? {
         val start = dateUtil.now()
-        val sensitivity = calculateVariableIsf(start, bg = null)
+        val multiplier = (profile as ProfileSealed.EPS).value.originalPercentage / 100.0
+        val sensitivity = calculateVariableIsf(start)
         if (sensitivity.second == null)
             uiInteraction.addNotificationValidTo(
                 Notification.DYN_ISF_FALLBACK, start,
-                rh.gs(R.string.fallback_to_isf_no_tdd), Notification.INFO, dateUtil.now() + T.mins(1).msecs()
+                rh.gs(R.string.fallback_to_isf_no_tdd, sensitivity.first), Notification.INFO, dateUtil.now() + T.mins(1).msecs()
             )
         else
             uiInteraction.dismissNotification(Notification.DYN_ISF_FALLBACK)
-        profiler.log(LTag.APS, String.format("getIsfMgdl() %s %f %s %s", sensitivity.first, sensitivity.second, dateUtil.dateAndTimeAndSecondsString(start), caller), start)
+        profiler.log(LTag.APS, String.format(Locale.getDefault(), "getIsfMgdl() %s %f %s %s", sensitivity.first, sensitivity.second, dateUtil.dateAndTimeAndSecondsString(start), caller), start)
         return sensitivity.second?.let { it * multiplier }
     }
 
@@ -217,16 +219,16 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
     private val dynIsfCache = LongSparseArray<Double>()
 
     @Synchronized
-    private fun calculateVariableIsf(timestamp: Long, @Suppress("SameParameterValue") bg: Double?): Pair<String, Double?> {
+    private fun calculateVariableIsf(timestamp: Long): Pair<String, Double?> {
         val profile = profileFunction.getProfile(timestamp)
         if (profile == null) return Pair("OFF", null)
         if (!preferences.get(BooleanKey.ApsUseDynamicSensitivity)) return Pair("OFF", null)
         val result = persistenceLayer.getApsResultCloseTo(timestamp)
-        if (result?.variableSens != null) {
+        if (result?.variableSens != null && result.variableSens != 0.0) {
             aapsLogger.debug("calculateVariableIsf DB  ${dateUtil.dateAndTimeAndSecondsString(timestamp)} ${result.variableSens}")
             return Pair("DB", result.variableSens)
         }
-        val glucose = bg ?: glucoseStatusProvider.glucoseStatusData?.glucose ?: return Pair("GLUC", null)
+        val glucose = glucoseStatusProvider.glucoseStatusData?.glucose ?: return Pair("GLUC", null)
         // Round down to 30 min and use it as a key for caching
         // Add BG to key as it affects calculation
         val key = timestamp - timestamp % T.mins(30).msecs() + glucose.toLong()
@@ -849,7 +851,6 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
             val evenTarget: Boolean
             val msgUnits: String
             val msgTail: String
-            val msgEven: String
             if (profile.out_units == "mmol/L") {
                 evenTarget = round(target * 10.0, 0).toInt() % 2 == 0
                 target = round(target, 1)
@@ -861,7 +862,7 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
                 msgUnits = "is"
                 msgTail = "number"
             }
-            msgEven = if (evenTarget) "even" else "odd"
+            val msgEven: String = if (evenTarget) "even" else "odd"
 
             val iobThUser = preferences.get(IntKey.ApsAutoIsfIobThPercent)  //iobThresholdPercent
             if (useIobTh) {
@@ -884,7 +885,7 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
                 consoleLog.add("SMB disabled because of max_iob=0")
                 return "blocked"
             } else if (useIobTh && iobThEffective < iob_data_iob) {
-                consoleLog.add("SMB disabled by Full Loop logic: iob ${iob_data_iob} is above effective iobTH $iobThEffective")
+                consoleLog.add("SMB disabled by Full Loop logic: iob $iob_data_iob is above effective iobTH $iobThEffective")
                 consoleLog.add("Loop power level temporarily capped")
                 return "iobTH"
             } else {

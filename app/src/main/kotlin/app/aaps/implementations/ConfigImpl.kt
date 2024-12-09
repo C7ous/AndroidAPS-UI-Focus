@@ -37,6 +37,9 @@ class ConfigImpl @Inject constructor(
 
     private var isEngineeringMode: Boolean? = null
     private var isUnfinishedMode: Boolean? = null
+    private var showUserActionsOnWatchOnly: Boolean? = null
+    private var ignoreNightscoutV3Errors: Boolean? = null
+    private var doNotSendSmsOnProfileChange: Boolean? = null
 
     override fun isEngineeringModeOrRelease(): Boolean = if (!APS) true else isEngineeringMode() || !isDev()
     override fun isEngineeringMode(): Boolean = isEngineeringMode ?: (fileListProvider.ensureExtraDirExists()?.findFile("engineering_mode") != null).also { isEngineeringMode = it }

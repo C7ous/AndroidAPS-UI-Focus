@@ -80,6 +80,12 @@ abstract class BaseWatchFace : WatchFace() {
     var basalBackgroundColor = Color.BLUE
     var basalCenterColor = Color.BLUE
     var carbColor = Color.GREEN
+    var tempTargetColor = Color.YELLOW
+    var tempTargetProfileColor = Color.WHITE
+    var tempTargetLoopColor = Color.GREEN
+    var reservoirColor = Color.WHITE
+    var reservoirUrgentColor = Color.RED
+    var reservoirWarningColor = Color.YELLOW
     private var bolusColor = Color.MAGENTA
     private var lowResMode = false
     private var layoutSet = false
@@ -126,9 +132,7 @@ abstract class BaseWatchFace : WatchFace() {
             .observeOn(aapsSchedulers.main)
             .subscribe { event: EventWearPreferenceChange ->
                 simpleUi.updatePreferences()
-                if (event.changedKey != null && event.changedKey == "delta_granularity") rxBus.send(EventWearToMobile(ActionResendData("BaseWatchFace:onSharedPreferenceChanged")))
                 if (layoutSet) setDataFields()
-                updatePreferences()
                 invalidate()
             }
         disposable += rxBus
@@ -280,10 +284,6 @@ abstract class BaseWatchFace : WatchFace() {
         }
     }
 
-    open fun updatePreferences() {
-        //Override within CustomWatchface
-    }
-
     @SuppressLint("SetTextI18n")
     open fun setDataFields() {
         detailedIob = sp.getBoolean(R.string.key_show_detailed_iob, false)
@@ -299,7 +299,12 @@ abstract class BaseWatchFace : WatchFace() {
         binding.delta?.visibility = sp.getBoolean(R.string.key_show_delta, true).toVisibility()
         binding.avgDelta?.text = if (detailedDelta) singleBg[0].avgDeltaDetailed else singleBg[0].avgDelta
         binding.avgDelta?.visibility = sp.getBoolean(R.string.key_show_avg_delta, true).toVisibility()
+        binding.tempTarget?.text = status[0].tempTarget
+        binding.tempTarget?.visibility = sp.getBoolean(R.string.key_show_temp_target, true).toVisibility()
+        binding.reservoir?.text = status[0].reservoirString
+        binding.reservoir?.visibility = sp.getBoolean(R.string.key_show_reservoir_level, true).toVisibility()
         binding.cob1?.visibility = sp.getBoolean(R.string.key_show_cob, true).toVisibility()
+        binding.cob1?.text = getString(R.string.activity_carb)
         binding.cob2?.visibility = sp.getBoolean(R.string.key_show_cob, true).toVisibility()
         binding.cob2?.text = status[0].cob
         binding.iob1?.visibility = sp.getBoolean(R.string.key_show_iob, true).toVisibility()
@@ -320,9 +325,9 @@ abstract class BaseWatchFace : WatchFace() {
             if (detailedIob) "${status[0].iobSum} ${status[0].iobDetail}"
             else status[0].iobSum + getString(R.string.units_short)
         externalStatus = if (showBgi)
-            "${status[0].externalStatus} ${iobString} ${status[0].bgi}"
+            "${status[0].externalStatus} $iobString ${status[0].bgi}"
         else
-            "${status[0].externalStatus} ${iobString}"
+            "${status[0].externalStatus} $iobString"
         binding.status?.text = externalStatus
         binding.status?.visibility = sp.getBoolean(R.string.key_show_external_status, true).toVisibility()
         binding.loop?.visibility = sp.getBoolean(R.string.key_show_external_status, true).toVisibility()
@@ -350,7 +355,12 @@ abstract class BaseWatchFace : WatchFace() {
             binding.deltaExt1?.visibility = sp.getBoolean(R.string.key_show_delta, true).toVisibility()
             binding.avgDeltaExt1?.text = if (detailedDelta) singleBg[1].avgDeltaDetailed else singleBg[1].avgDelta
             binding.avgDeltaExt1?.visibility = sp.getBoolean(R.string.key_show_avg_delta, true).toVisibility()
+            binding.tempTargetExt1?.text = status[1].tempTarget
+            binding.tempTargetExt1?.visibility = sp.getBoolean(R.string.key_show_temp_target, false).toVisibility()
+            binding.reservoirExt1?.text = status[1].reservoirString
+            binding.reservoirExt1?.visibility = sp.getBoolean(R.string.key_show_reservoir_level, true).toVisibility()
             binding.cob1Ext1?.visibility = sp.getBoolean(R.string.key_show_cob, true).toVisibility()
+            binding.cob1Ext1?.text = getString(R.string.activity_carb)
             binding.cob2Ext1?.visibility = sp.getBoolean(R.string.key_show_cob, true).toVisibility()
             binding.cob2Ext1?.text = status[1].cob
             binding.iob1Ext1?.visibility = sp.getBoolean(R.string.key_show_iob, true).toVisibility()
@@ -369,9 +379,9 @@ abstract class BaseWatchFace : WatchFace() {
                 if (detailedIob) "${status[1].iobSum} ${status[1].iobDetail}"
                 else status[1].iobSum + getString(R.string.units_short)
             externalStatusExt1 = if (showBgi)
-                "${status[1].externalStatus} ${iobStringExt1} ${status[1].bgi}"
+                "${status[1].externalStatus} $iobStringExt1 ${status[1].bgi}"
             else
-                "${status[1].externalStatus} ${iobStringExt1}"
+                "${status[1].externalStatus} $iobStringExt1"
             binding.statusExt1?.text = externalStatusExt1
             binding.statusExt1?.visibility = sp.getBoolean(R.string.key_show_external_status, true).toVisibility()
             binding.loopExt1?.visibility = sp.getBoolean(R.string.key_show_external_status, true).toVisibility()
@@ -400,7 +410,12 @@ abstract class BaseWatchFace : WatchFace() {
             binding.deltaExt2?.visibility = sp.getBoolean(R.string.key_show_delta, true).toVisibility()
             binding.avgDeltaExt2?.text = if (detailedDelta) singleBg[2].avgDeltaDetailed else singleBg[2].avgDelta
             binding.avgDeltaExt2?.visibility = sp.getBoolean(R.string.key_show_avg_delta, true).toVisibility()
+            binding.tempTargetExt2?.text = status[2].tempTarget
+            binding.tempTargetExt2?.visibility = sp.getBoolean(R.string.key_show_temp_target, false).toVisibility()
+            binding.reservoirExt2?.text = status[2].reservoirString
+            binding.reservoirExt2?.visibility = sp.getBoolean(R.string.key_show_reservoir_level, true).toVisibility()
             binding.cob1Ext2?.visibility = sp.getBoolean(R.string.key_show_cob, true).toVisibility()
+            binding.cob1Ext2?.text = getString(R.string.activity_carb)
             binding.cob2Ext2?.visibility = sp.getBoolean(R.string.key_show_cob, true).toVisibility()
             binding.cob2Ext2?.text = status[2].cob
             binding.iob1Ext2?.visibility = sp.getBoolean(R.string.key_show_iob, true).toVisibility()
@@ -419,9 +434,9 @@ abstract class BaseWatchFace : WatchFace() {
                 if (detailedIob) "${status[2].iobSum} ${status[2].iobDetail}"
                 else status[2].iobSum + getString(R.string.units_short)
             externalStatusExt2 = if (showBgi)
-                "${status[2].externalStatus} ${iobStringExt2} ${status[2].bgi}"
+                "${status[2].externalStatus} $iobStringExt2 ${status[2].bgi}"
             else
-                "${status[2].externalStatus} ${iobStringExt2}"
+                "${status[2].externalStatus} $iobStringExt2"
             binding.statusExt2?.text = externalStatusExt2
             binding.statusExt2?.visibility = sp.getBoolean(R.string.key_show_external_status, true).toVisibility()
             binding.loopExt2?.visibility = sp.getBoolean(R.string.key_show_external_status, true).toVisibility()
@@ -531,7 +546,7 @@ abstract class BaseWatchFace : WatchFace() {
         if (simpleUi.isEnabled(currentWatchMode)) {
             return
         }
-        if (binding.chart != null && graphData.entries.size > 0) {
+        if (binding.chart != null && graphData.entries.isNotEmpty()) {
             val timeframe = sp.getInt(R.string.key_chart_time_frame, 3)
             val bgGraphBuilder =
                 if (lowResMode)

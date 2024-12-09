@@ -66,9 +66,7 @@
     <string name="enable_smb_summary">Для ускорения действия использовать супер микро болюсы SMB вместо временного базала</string>
     <string name="enable_uam_summary">Обнаружение незапланированного приема пищи</string>
     <string name="enable_smb_always">Всегда включать супер микро болюс SMB</string>
-    <string name="enable_smb_always_summary">Всегда включать супер микро болюс SMB независимо от болюсов. Возможно только для источников ГК с хорошей фильтрацией данных вроде G5</string>
     <string name="enable_smb_after_carbs">Включать супер микро болюс SMB после углеводов</string>
-    <string name="enable_smb_after_carbs_summary">Включать супер микро болюс SMB на 6 часов после углеводов, даже при 0 активных углеводов COB. Возможно только для источников ГК с хорошей фильтрацией данных вроде G5</string>
     <string name="enable_smb_with_cob">Включать супер микро болюсы при активных углеводах COB</string>
     <string name="enable_smb_with_cob_summary">Включить супер микро болюс SMB, когда имеются активные углеводы COB.</string>
     <string name="enable_smb_with_temp_target">Включить супер микро болюсы SMB с временными целями</string>
@@ -122,7 +120,6 @@
     <string name="loop_open_mode_min_change">Минимальный запрос на изменения [%]</string>
     <string name="loop_open_mode_min_change_summary" formatted="false">Алгоритм ИПЖ выдаст всплывающее окно с запросом на новые изменения, только если изменение больше, чем это значение в %. Значение по умолчанию — 20%</string>
     <string name="fallback_smb_no_tdd">Возврат к SMB. Недостаточно данных TDD.</string>
-    <string name="fallback_to_isf_no_tdd">Откат к чувствительности профиля. Недостаточно данных TDD.</string>
     <!-- Autotune -->
     <string name="autotune_description">Помощь в возможной корректировке профиля (ISF, IC, базал)</string>
     <string name="autotune_shortname">АвтТюн</string>
@@ -171,22 +168,8 @@
     <string name="half_basal_exercise_target_summary">Установливается как число, например, 160 означает, что при ВЦ 160 мг/дл и настройке \"Высокая ВЦ повышает чувствительность =true\", активируется 50%% базальной скорости (120 = 75%%; 140 = 60%%).</string>
     <string name="autoISF_settings_title">Настройки AutoISF</string>
     <string name="autoISF_settings_summary">АвтоISF позволяет адаптировать фактор чувствительности (ISF) к различных вариантам изменения гликемии\n\nОн также может изменять настройки микроболюсов SMB</string>
-    <string name="acce_ISF_settings_title">настройки acce_ISF</string>
-    <string name="acce_ISF_settings_summary">Настройка acce_ISF: изменять ISF для ускорения/замедления гликемии</string>
-    <string name="enableautoISFwithcob">Включить dura_ISF при наличии активных углеводов COB</string>
-    <string name="enableautoISFwithcob_summary">Включить dura_ISF, когда имеются активные углеводы COB</string>
-    <string name="bg_ISF_settings_title">настройки bg_ISF</string>
-    <string name="bg_ISF_settings_summary">Настройки BG_ISF: ISF зависит от уровня гликемии по заранее определенному многоугольнику</string>
-    <string name="pp_ISF_settings_title">Настройки pp_ISF</string>
-    <string name="pp_ISF_settings_summary">Настройки pp_ISF: коэффициент чувствительности ISF для постпрандиального (после еды) подъема уровня глюкозы</string>
-    <string name="dura_ISF_settings_title">настройки dura_ISF</string>
-    <string name="dura_ISF_settings_summary">настройки dura_ISF при выходе ГК на плато выше целеввого диапазона</string>
     <string name="smb_delivery_settings_title">Настройки введения микроболюсов SMB</string>
     <string name="smb_delivery_settings_summary">Набор параметров для увеличения фактического размера микроболюсов SMB, которые могут быть применены при усилении ISF, т.е. при низких значениях ISF.\n\nИСПОЛЬЗОВАТЬ С ОСТОРОЖНОСТЬЮ</string>
-    <string name="full_loop_settings_title">Параметры полного цикла</string>
-    <string name="full_loop_settings_summary">Параметры полного цикла: настройки порога активного инсулина для ограничения накопления IOB</string>
-    <string name="use_autoISF_extensions_title">Включить расширенный функционал чувствительности AutoISF</string>
-    <string name="use_autoISF_extensions_summary">К ним относятся модуляция ISF из-за недавних изменений ГК. альтернативные средства поддержки микроболюсов SMB и поддержка полного замкнутого цикла</string>
     <string name="openapsama_enable_autoISF">Включить адаптивную чувствительность ISF в зависимости от поведения ГК</string>
     <string name="openapsama_autoISF_max_summary">Аналогично autosense_max определяет, насколько сильным может стать ISF. Значение 1.0 по умолчанию его отключает. Предупреждение: Будьте предельно осторожны при использовании значений выше 2.5</string>
     <string name="openapsama_autoISF_min_summary">Подобно autosens_min определяет насколько слабой может стать чувствительность ISF.\n\nЗначение по умолчанию 1.0 отключает этот эффект.</string>

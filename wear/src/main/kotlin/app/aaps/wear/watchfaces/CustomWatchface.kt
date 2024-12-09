@@ -68,6 +68,7 @@ class CustomWatchface : BaseWatchFace() {
     private var resDataMap: CwfResDataMap = mutableMapOf()
     private var json = JSONObject()
     private var jsonString = ""
+
     private fun bgColor(dataSet: Int): Int = when (singleBg[dataSet].sgvLevel) {
         1L   -> highColor
         0L   -> midColor
@@ -75,11 +76,25 @@ class CustomWatchface : BaseWatchFace() {
         else -> midColor
     }
 
+    private fun tempTargetColor(dataSet: Int): Int = when (status[dataSet].tempTargetLevel) {
+        0   -> tempTargetProfileColor
+        1   -> tempTargetLoopColor
+        2  -> tempTargetColor
+        else -> tempTargetProfileColor
+    }
+
+    private fun reservoirColor(dataSet: Int): Int = when (status[dataSet].reservoirLevel) {
+        0    -> reservoirColor
+        1    -> reservoirWarningColor
+        2    -> reservoirUrgentColor
+        else -> reservoirColor
+    }
+
     @Suppress("DEPRECATION")
     override fun inflateLayout(inflater: LayoutInflater): ViewBinding {
         binding = ActivityCustomBinding.inflate(inflater)
         setDefaultColors()
-        persistence.store(defaultWatchface(), true)
+        persistence.store(defaultWatchface(false), defaultWatchface(true), true)
         (context.getSystemService(WINDOW_SERVICE) as WindowManager).defaultDisplay.getSize(displaySize)
         zoomFactor = (displaySize.x).toDouble() / templeResolution.toDouble()
         return binding
@@ -106,12 +121,12 @@ class CustomWatchface : BaseWatchFace() {
         binding.hourHand.rotation = TimeOfDay().hourOfDay * 30f + TimeOfDay().minuteOfHour * 0.5f
     }
 
-    override fun updatePreferences() {
-        persistence.store(defaultWatchface(), true)
-    }
-
     override fun setColorDark() {
         setWatchfaceStyle()
+        if ((ViewMap.TEMP_TARGET.dynData?.stepFontColor ?: 0) <= 0)
+            binding.tempTarget.setTextColor(tempTargetColor(0))
+        if ((ViewMap.RESERVOIR.dynData?.stepFontColor ?: 0) <= 0)
+            binding.reservoir.setTextColor(reservoirColor(0))
         if ((ViewMap.SGV.dynData?.stepFontColor ?: 0) <= 0)
             binding.sgv.setTextColor(bgColor(0))
         if ((ViewMap.DIRECTION.dynData?.stepColor ?: 0) <= 0)
@@ -127,6 +142,10 @@ class CustomWatchface : BaseWatchFace() {
                 else -> binding.loop.setBackgroundResource(R.drawable.loop_red_25)
             }
         //Management of External data 1
+        if ((ViewMap.TEMP_TARGET_EXT1.dynData?.stepFontColor ?: 0) <= 0)
+            binding.tempTargetExt1.setTextColor(tempTargetColor(1))
+        if ((ViewMap.RESERVOIR_EXT1.dynData?.stepFontColor ?: 0) <= 0)
+            binding.reservoirExt1.setTextColor(reservoirColor(1))
         if ((ViewMap.SGV_EXT1.dynData?.stepFontColor ?: 0) <= 0)
             binding.sgvExt1.setTextColor(bgColor(1))
         if ((ViewMap.DIRECTION_EXT1.dynData?.stepColor ?: 0) <= 0)
@@ -140,6 +159,10 @@ class CustomWatchface : BaseWatchFace() {
                 else -> binding.loopExt1.setBackgroundResource(R.drawable.loop_red_25)
             }
         //Management of External data 2
+        if ((ViewMap.TEMP_TARGET_EXT1.dynData?.stepFontColor ?: 0) <= 0)
+            binding.tempTargetExt2.setTextColor(tempTargetColor(2))
+        if ((ViewMap.RESERVOIR_EXT2.dynData?.stepFontColor ?: 0) <= 0)
+            binding.reservoirExt2.setTextColor(reservoirColor(2))
         if ((ViewMap.SGV_EXT2.dynData?.stepFontColor ?: 0) <= 0)
             binding.sgvExt2.setTextColor(bgColor(2))
         if ((ViewMap.DIRECTION_EXT2.dynData?.stepColor ?: 0) <= 0)
@@ -180,7 +203,11 @@ class CustomWatchface : BaseWatchFace() {
     }
 
     private fun setWatchfaceStyle() {
-        val customWatchface = persistence.readCustomWatchface() ?: persistence.readCustomWatchface(true)
+        var customWatchface = persistence.readCustomWatchface() ?: persistence.readCustomWatchface(true)
+        if (customWatchface == null) { // if neither CWF or Default CWF is found within persistence, then force reload of default Layout
+            super.onCreate()
+            customWatchface = persistence.readCustomWatchface(true)
+        }
         customWatchface?.let {
             updatePref(it.customWatchfaceData.metadata)
             try {
@@ -216,6 +243,12 @@ class CustomWatchface : BaseWatchFace() {
                 basalBackgroundColor = getColor(jsonColor.optString(JsonKeys.BASALBACKGROUNDCOLOR.key), ContextCompat.getColor(this, R.color.basal_dark))
                 basalCenterColor = getColor(jsonColor.optString(JsonKeys.BASALCENTERCOLOR.key), ContextCompat.getColor(this, R.color.basal_light))
                 gridColor = getColor(jsonColor.optString(JsonKeys.GRIDCOLOR.key), Color.WHITE)
+                tempTargetProfileColor = getColor(jsonColor.optString(JsonKeys.TEMPTARGETPROFILECOLOR.key), Color.WHITE)
+                tempTargetLoopColor = getColor(jsonColor.optString(JsonKeys.TEMPTARGETLOOPCOLOR.key), ContextCompat.getColor(this, R.color.dark_tempTarget_Loop))
+                tempTargetColor = getColor(jsonColor.optString(JsonKeys.TEMPTARGETCOLOR.key), ContextCompat.getColor(this, R.color.dark_tempTarget))
+                reservoirColor = getColor(jsonColor.optString(JsonKeys.RESERVOIRCOLOR.key), Color.WHITE)
+                reservoirWarningColor = getColor(jsonColor.optString(JsonKeys.RESERVOIRWARNINGCOLOR.key), ContextCompat.getColor(this, R.color.dark_warning))
+                reservoirUrgentColor = getColor(jsonColor.optString(JsonKeys.RESERVOIRURGENTCOLOR.key), ContextCompat.getColor(this, R.color.dark_alarm))
                 enableExt1 = false
                 enableExt2 = false
                 binding.mainLayout.forEach { view ->
@@ -236,7 +269,7 @@ class CustomWatchface : BaseWatchFace() {
                 manageSpecificViews()
             } catch (_: Exception) {
                 aapsLogger.debug(LTag.WEAR, "Crash during Custom watch load")
-                persistence.store(defaultWatchface(), false) // relaod correct values to avoid crash of watchface
+                persistence.store(defaultWatchface(true), isDefault = false) // relaod correct values to avoid crash of watchface
             }
         }
     }
@@ -252,8 +285,7 @@ class CustomWatchface : BaseWatchFace() {
         }
     }
 
-    private fun defaultWatchface(): EventData.ActionSetCustomWatchface {
-        val externalViews = sp.getBoolean(R.string.key_include_external, false)
+    private fun defaultWatchface(externalViews: Boolean): EventData.ActionSetCustomWatchface {
         val metadata = JSONObject()
             .put(CwfMetadataKey.CWF_NAME.key, getString(app.aaps.core.interfaces.R.string.wear_default_watchface))
             .put(CwfMetadataKey.CWF_FILENAME.key, getString(app.aaps.core.interfaces.R.string.wear_default_watchface))
@@ -272,6 +304,12 @@ class CustomWatchface : BaseWatchFace() {
             .put(JsonKeys.BASALBACKGROUNDCOLOR.key, String.format("#%06X", 0xFFFFFF and basalBackgroundColor))
             .put(JsonKeys.BASALCENTERCOLOR.key, String.format("#%06X", 0xFFFFFF and basalCenterColor))
             .put(JsonKeys.GRIDCOLOR.key, String.format("#%06X", 0xFFFFFF and Color.WHITE))
+            .put(JsonKeys.TEMPTARGETPROFILECOLOR.key, String.format("#%06X", 0xFFFFFF and Color.WHITE))
+            .put(JsonKeys.TEMPTARGETLOOPCOLOR.key, String.format("#%06X", 0xFFFFFF and ContextCompat.getColor(this, R.color.dark_tempTarget_Loop)))
+            .put(JsonKeys.TEMPTARGETCOLOR.key, String.format("#%06X", 0xFFFFFF and ContextCompat.getColor(this, R.color.dark_tempTarget)))
+            .put(JsonKeys.RESERVOIRCOLOR.key, String.format("#%06X", 0xFFFFFF and Color.WHITE))
+            .put(JsonKeys.RESERVOIRWARNINGCOLOR.key, String.format("#%06X", 0xFFFFFF and ContextCompat.getColor(this, R.color.dark_warning)))
+            .put(JsonKeys.RESERVOIRURGENTCOLOR.key, String.format("#%06X", 0xFFFFFF and ContextCompat.getColor(this, R.color.dark_alarm)))
             .put(JsonKeys.POINTSIZE.key, 2)
             .put(JsonKeys.ENABLESECOND.key, true)
 
@@ -326,6 +364,12 @@ class CustomWatchface : BaseWatchFace() {
         basalBackgroundColor = ContextCompat.getColor(this, R.color.basal_dark)
         basalCenterColor = ContextCompat.getColor(this, R.color.basal_light)
         lowBatColor = ContextCompat.getColor(this, R.color.dark_uploaderBatteryEmpty)
+        tempTargetProfileColor =  Color.WHITE
+        tempTargetLoopColor =  ContextCompat.getColor(this, R.color.dark_tempTarget_Loop)
+        tempTargetColor =  ContextCompat.getColor(this, R.color.dark_tempTarget)
+        reservoirColor = Color.WHITE
+        reservoirWarningColor = ContextCompat.getColor(this, R.color.dark_warning)
+        reservoirUrgentColor = ContextCompat.getColor(this, R.color.dark_alarm)
         gridColor = Color.WHITE
     }
 
@@ -428,13 +472,15 @@ class CustomWatchface : BaseWatchFace() {
         FREETEXT3(ViewKeys.FREETEXT3.key, R.id.freetext3),
         FREETEXT4(ViewKeys.FREETEXT4.key, R.id.freetext4),
         PATIENT_NAME_EXT1(ViewKeys.PATIENT_NAME_EXT1.key, R.id.patient_name_ext1, external = 1),
-        IOB1_EXT1(ViewKeys.IOB1_EXT1.key, R.id.iob1_Ext1, R.string.key_show_iob, external = 1),
-        IOB2_EXT1(ViewKeys.IOB2_EXT1.key, R.id.iob2_Ext1, R.string.key_show_iob, external = 1),
+        IOB1_EXT1(ViewKeys.IOB1_EXT1.key, R.id.iob1_ext1, R.string.key_show_iob, external = 1),
+        IOB2_EXT1(ViewKeys.IOB2_EXT1.key, R.id.iob2_ext1, R.string.key_show_iob, external = 1),
         COB1_EXT1(ViewKeys.COB1_EXT1.key, R.id.cob1_ext1, R.string.key_show_cob, external = 1),
         COB2_EXT1(ViewKeys.COB2_EXT1.key, R.id.cob2_ext1, R.string.key_show_cob, external = 1),
         DELTA_EXT1(ViewKeys.DELTA_EXT1.key, R.id.delta_ext1, R.string.key_show_delta, external = 1),
         AVG_DELTA_EXT1(ViewKeys.AVG_DELTA_EXT1.key, R.id.avg_delta_ext1, R.string.key_show_avg_delta, external = 1),
-        RIG_BATTERY_EXT1(ViewKeys.RIG_BATTERY_EXT1.key, R.id.rig_battery_ext1, R.string.key_show_rig_battery),
+        TEMP_TARGET_EXT1(ViewKeys.TEMP_TARGET_EXT1.key, R.id.temp_target_ext1, R.string.key_show_temp_target, external = 1),
+        RESERVOIR_EXT1(ViewKeys.RESERVOIR_EXT1.key, R.id.reservoir_ext1, R.string.key_show_reservoir_level, external = 1),
+        RIG_BATTERY_EXT1(ViewKeys.RIG_BATTERY_EXT1.key, R.id.rig_battery_ext1, R.string.key_show_rig_battery, external = 1),
         BASALRATE_EXT1(ViewKeys.BASALRATE_EXT1.key, R.id.basalRate_ext1, R.string.key_show_temp_basal, external = 1),
         BGI_EXT1(ViewKeys.BGI_EXT1.key, R.id.bgi_ext1, R.string.key_show_bgi, external = 1),
         STATUS_EXT1(ViewKeys.STATUS_EXT1.key, R.id.status_ext1, R.string.key_show_external_status, external = 1),
@@ -443,13 +489,15 @@ class CustomWatchface : BaseWatchFace() {
         TIMESTAMP_EXT1(ViewKeys.TIMESTAMP_EXT1.key, R.id.timestamp_ext1, R.string.key_show_ago, external = 1),
         SGV_EXT1(ViewKeys.SGV_EXT1.key, R.id.sgv_ext1, R.string.key_show_bg, external = 1),
         PATIENT_NAME_EXT2(ViewKeys.PATIENT_NAME_EXT2.key, R.id.patient_name_ext2, external = 2),
-        IOB1_EXT2(ViewKeys.IOB1_EXT2.key, R.id.iob1_Ext2, R.string.key_show_iob, external = 2),
-        IOB2_EXT2(ViewKeys.IOB2_EXT2.key, R.id.iob2_Ext2, R.string.key_show_iob, external = 2),
+        IOB1_EXT2(ViewKeys.IOB1_EXT2.key, R.id.iob1_ext2, R.string.key_show_iob, external = 2),
+        IOB2_EXT2(ViewKeys.IOB2_EXT2.key, R.id.iob2_ext2, R.string.key_show_iob, external = 2),
         COB1_EXT2(ViewKeys.COB1_EXT2.key, R.id.cob1_ext2, R.string.key_show_cob, external = 2),
         COB2_EXT2(ViewKeys.COB2_EXT2.key, R.id.cob2_ext2, R.string.key_show_cob, external = 2),
         DELTA_EXT2(ViewKeys.DELTA_EXT2.key, R.id.delta_ext2, R.string.key_show_delta, external = 2),
         AVG_DELTA_EXT2(ViewKeys.AVG_DELTA_EXT2.key, R.id.avg_delta_ext2, R.string.key_show_avg_delta, external = 2),
-        RIG_BATTERY_EXT2(ViewKeys.RIG_BATTERY_EXT2.key, R.id.rig_battery_ext2, R.string.key_show_rig_battery),
+        TEMP_TARGET_EXT2(ViewKeys.TEMP_TARGET_EXT2.key, R.id.temp_target_ext2, R.string.key_show_temp_target, external = 2),
+        RESERVOIR_EXT2(ViewKeys.RESERVOIR_EXT2.key, R.id.reservoir_ext2, R.string.key_show_reservoir_level, external = 2),
+        RIG_BATTERY_EXT2(ViewKeys.RIG_BATTERY_EXT2.key, R.id.rig_battery_ext2, R.string.key_show_rig_battery, external = 2),
         BASALRATE_EXT2(ViewKeys.BASALRATE_EXT2.key, R.id.basalRate_ext2, R.string.key_show_temp_basal, external = 2),
         BGI_EXT2(ViewKeys.BGI_EXT2.key, R.id.bgi_ext2, R.string.key_show_bgi, external = 2),
         STATUS_EXT2(ViewKeys.STATUS_EXT2.key, R.id.status_ext2, R.string.key_show_external_status, external = 2),
@@ -464,6 +512,8 @@ class CustomWatchface : BaseWatchFace() {
         COB2(ViewKeys.COB2.key, R.id.cob2, R.string.key_show_cob),
         DELTA(ViewKeys.DELTA.key, R.id.delta, R.string.key_show_delta),
         AVG_DELTA(ViewKeys.AVG_DELTA.key, R.id.avg_delta, R.string.key_show_avg_delta),
+        TEMP_TARGET(ViewKeys.TEMP_TARGET.key, R.id.temp_target, R.string.key_show_temp_target),
+        RESERVOIR(ViewKeys.RESERVOIR.key, R.id.reservoir, R.string.key_show_reservoir_level),
         UPLOADER_BATTERY(ViewKeys.UPLOADER_BATTERY.key, R.id.uploader_battery, R.string.key_show_uploader_battery),
         RIG_BATTERY(ViewKeys.RIG_BATTERY.key, R.id.rig_battery, R.string.key_show_rig_battery),
         BASALRATE(ViewKeys.BASALRATE.key, R.id.basalRate, R.string.key_show_temp_basal),
@@ -767,6 +817,8 @@ class CustomWatchface : BaseWatchFace() {
         SHOW_COB(CwfMetadataKey.CWF_PREF_WATCH_SHOW_COB.key, R.string.key_show_cob, true),
         SHOW_DELTA(CwfMetadataKey.CWF_PREF_WATCH_SHOW_DELTA.key, R.string.key_show_delta, true),
         SHOW_AVG_DELTA(CwfMetadataKey.CWF_PREF_WATCH_SHOW_AVG_DELTA.key, R.string.key_show_avg_delta, true),
+        SHOW_TEMP_TARGET(CwfMetadataKey.CWF_PREF_WATCH_SHOW_TEMP_TARGET.key, R.string.key_show_temp_target, true),
+        SHOW_RESERVOIR_LEVEL(CwfMetadataKey.CWF_PREF_WATCH_SHOW_RESERVOIR_LEVEL.key, R.string.key_show_reservoir_level, true),
         SHOW_DETAILED_DELTA(CwfMetadataKey.CWF_PREF_WATCH_SHOW_DETAILED_DELTA.key, R.string.key_show_detailed_delta, true),
         SHOW_UPLOADER_BATTERY(CwfMetadataKey.CWF_PREF_WATCH_SHOW_UPLOADER_BATTERY.key, R.string.key_show_uploader_battery, true),
         SHOW_RIG_BATTERY(CwfMetadataKey.CWF_PREF_WATCH_SHOW_RIG_BATTERY.key, R.string.key_show_rig_battery, true),
@@ -797,6 +849,9 @@ class CustomWatchface : BaseWatchFace() {
         DIRECTION(ViewKeys.DIRECTION.key, 1.0, 7.0),
         DELTA(ViewKeys.DELTA.key, -25.0, 25.0),
         AVG_DELTA(ViewKeys.AVG_DELTA.key, -25.0, 25.0),
+        TEMP_TARGET(ViewKeys.TEMP_TARGET.key, 0.0, 2.0),
+        RESERVOIR(ViewKeys.RESERVOIR.key, 0.0, 500.0),
+        RESERVOIR_LEVEL(JsonKeyValues.RESERVOIR_LEVEL.key, 0.0, 2.0),
         UPLOADER_BATTERY(ViewKeys.UPLOADER_BATTERY.key, 0.0, 100.0),
         RIG_BATTERY(ViewKeys.RIG_BATTERY.key, 0.0, 100.0),
         TIMESTAMP(ViewKeys.TIMESTAMP.key, 0.0, 60.0),
@@ -810,6 +865,9 @@ class CustomWatchface : BaseWatchFace() {
         DIRECTION_EXT1(ViewKeys.DIRECTION_EXT1.key, 1.0, 7.0),
         DELTA_EXT1(ViewKeys.DELTA_EXT1.key, -25.0, 25.0),
         AVG_DELTA_EXT1(ViewKeys.AVG_DELTA_EXT1.key, -25.0, 25.0),
+        TEMP_TARGET_EXT1(ViewKeys.TEMP_TARGET_EXT1.key, 0.0, 2.0),
+        RESERVOIR_EXT1(ViewKeys.RESERVOIR_EXT1.key, 0.0, 500.0),
+        RESERVOIR_LEVEL_EXT1(JsonKeyValues.RESERVOIR_LEVEL_EXT1.key, 0.0, 2.0),
         RIG_BATTERY_EXT1(ViewKeys.RIG_BATTERY_EXT1.key, 0.0, 100.0),
         TIMESTAMP_EXT1(ViewKeys.TIMESTAMP_EXT1.key, 0.0, 60.0),
         LOOP_EXT1(ViewKeys.LOOP_EXT1.key, 0.0, 28.0),
@@ -818,6 +876,9 @@ class CustomWatchface : BaseWatchFace() {
         DIRECTION_EXT2(ViewKeys.DIRECTION_EXT2.key, 1.0, 7.0),
         DELTA_EXT2(ViewKeys.DELTA_EXT2.key, -25.0, 25.0),
         AVG_DELTA_EXT2(ViewKeys.AVG_DELTA_EXT2.key, -25.0, 25.0),
+        TEMP_TARGET_EXT2(ViewKeys.TEMP_TARGET_EXT2.key, 0.0, 2.0),
+        RESERVOIR_EXT2(ViewKeys.RESERVOIR_EXT2.key, 0.0, 500.0),
+        RESERVOIR_LEVEL_EXT2(JsonKeyValues.RESERVOIR_LEVEL_EXT2.key, 0.0, 2.0),
         RIG_BATTERY_EXT2(ViewKeys.RIG_BATTERY_EXT2.key, 0.0, 100.0),
         TIMESTAMP_EXT2(ViewKeys.TIMESTAMP_EXT2.key, 0.0, 60.0),
         LOOP_EXT2(ViewKeys.LOOP_EXT2.key, 0.0, 28.0);
@@ -885,6 +946,9 @@ class CustomWatchface : BaseWatchFace() {
                 ValueMap.DIRECTION        -> TrendArrowMap.value()
                 ValueMap.DELTA            -> cwf.singleBg[0].deltaMgdl
                 ValueMap.AVG_DELTA        -> cwf.singleBg[0].avgDeltaMgdl
+                ValueMap.TEMP_TARGET      -> cwf.status[0].tempTargetLevel.toDouble()
+                ValueMap.RESERVOIR        -> cwf.status[0].reservoir
+                ValueMap.RESERVOIR_LEVEL  -> cwf.status[0].reservoirLevel.toDouble()
                 ValueMap.RIG_BATTERY      -> cwf.status[0].rigBattery.replace("%", "").toDoubleOrNull()
                 ValueMap.UPLOADER_BATTERY -> cwf.status[0].battery.replace("%", "").toDoubleOrNull()
                 ValueMap.LOOP             -> if (cwf.status[0].openApsStatus != -1L) ((System.currentTimeMillis() - cwf.status[0].openApsStatus) / 1000 / 60).toDouble() else null
@@ -898,6 +962,9 @@ class CustomWatchface : BaseWatchFace() {
                 ValueMap.DIRECTION_EXT1   -> TrendArrowMap.valueExt1()
                 ValueMap.DELTA_EXT1       -> cwf.singleBg[1].deltaMgdl
                 ValueMap.AVG_DELTA_EXT1   -> cwf.singleBg[1].avgDeltaMgdl
+                ValueMap.TEMP_TARGET_EXT1 -> cwf.status[1].tempTargetLevel.toDouble()
+                ValueMap.RESERVOIR_EXT1   -> cwf.status[1].reservoir
+                ValueMap.RESERVOIR_LEVEL_EXT1 -> cwf.status[1].reservoirLevel.toDouble()
                 ValueMap.RIG_BATTERY_EXT1 -> cwf.status[1].rigBattery.replace("%", "").toDoubleOrNull()
                 ValueMap.LOOP_EXT1        -> if (cwf.status[1].openApsStatus != -1L) ((System.currentTimeMillis() - cwf.status[1].openApsStatus) / 1000 / 60).toDouble() else null
                 ValueMap.TIMESTAMP_EXT1   -> if (cwf.singleBg[1].timeStamp != 0L) floor(cwf.timeSince(1) / (1000 * 60)) else null
@@ -906,6 +973,9 @@ class CustomWatchface : BaseWatchFace() {
                 ValueMap.DIRECTION_EXT2   -> TrendArrowMap.valueExt2()
                 ValueMap.DELTA_EXT2       -> cwf.singleBg[2].deltaMgdl
                 ValueMap.AVG_DELTA_EXT2   -> cwf.singleBg[2].avgDeltaMgdl
+                ValueMap.TEMP_TARGET_EXT2 -> cwf.status[2].tempTargetLevel.toDouble()
+                ValueMap.RESERVOIR_EXT2   -> cwf.status[2].reservoir
+                ValueMap.RESERVOIR_LEVEL_EXT2 -> cwf.status[2].reservoirLevel.toDouble()
                 ValueMap.RIG_BATTERY_EXT2 -> cwf.status[2].rigBattery.replace("%", "").toDoubleOrNull()
                 ValueMap.LOOP_EXT2        -> if (cwf.status[2].openApsStatus != -1L) ((System.currentTimeMillis() - cwf.status[2].openApsStatus) / 1000 / 60).toDouble() else null
                 ValueMap.TIMESTAMP_EXT2   -> if (cwf.singleBg[2].timeStamp != 0L) floor(cwf.timeSince(2) / (1000 * 60)) else null

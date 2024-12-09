@@ -633,7 +633,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             // Automation buttons
             binding.buttonsLayout.userButtonsLayout.removeAllViews()
             val events = automation.userEvents()
-            if (!loop.isDisconnected && pump.isInitialized() && !pump.isSuspended() && profile != null)
+            if (!loop.isDisconnected && pump.isInitialized() && !pump.isSuspended() && profile != null && !config.showUserActionsOnWatchOnly())
                 for (event in events)
                     if (event.isEnabled && event.canRun()) {
                         context?.let { context ->
@@ -1168,7 +1168,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         val profile = profileFunction.getProfile()
         val request = loop.lastRun?.request
         val isfMgdl = profile?.getProfileIsfMgdl()
-        val isfForCarbs = profile?.getIsfMgdlForCarbs(dateUtil.now(), "Overview")
+        val isfForCarbs = profile?.getIsfMgdlForCarbs(dateUtil.now(), "Overview", config, processedDeviceStatusData)
         val variableSens =
             if (config.APS) request?.variableSens ?: 0.0
             else if (config.NSCLIENT) processedDeviceStatusData.getAPSResult()?.variableSens ?: 0.0
@@ -1176,7 +1176,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         val ratioUsed = request?.autosensResult?.ratio ?: 1.0
 
         if (variableSens != isfMgdl && variableSens != 0.0 && isfMgdl != null) {
-            var text = if (ratioUsed != 1.0 && ratioUsed != lastAutosensData?.autosensResult?.ratio) String.format(Locale.getDefault(), "%.0f%%\n", ratioUsed * 100) else ""
+            var text = if (ratioUsed != 1.0 && ratioUsed != lastAutosensData?.autosensResult?.ratio) String.format(Locale.getDefault(), "Alg: %.0f%%\n", ratioUsed * 100) else ""
             text += String.format(
                 Locale.getDefault(), "%1$.1f→%2$.1f (%3$.1f)",
                 profileUtil.fromMgdlToUnits(isfMgdl, profileFunction.getUnits()),
