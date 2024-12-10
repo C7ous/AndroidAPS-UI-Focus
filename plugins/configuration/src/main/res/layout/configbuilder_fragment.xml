@@ -6,6 +6,8 @@
     android:orientation="vertical">
 
     <com.google.android.material.button.MaterialButton
+        app:cornerRadius="8dp"
+        app:strokeColor="@color/colorPrimary"
         android:id="@+id/unlock"
         style="@style/GrayButton"
         android:layout_width="wrap_content"

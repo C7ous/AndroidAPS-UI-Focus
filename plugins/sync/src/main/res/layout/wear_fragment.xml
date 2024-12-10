@@ -6,6 +6,77 @@
     android:fillViewport="true"
     tools:context="app.aaps.plugins.sync.wear.WearFragment">
 
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/log"
+        style="@style/Widget.MaterialComponents.CardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginTop="4dp"
+        app:cardCornerRadius="4dp"
+        app:contentPadding="2dp"
+        app:cardElevation="2dp"
+        app:cardUseCompatPadding="false"
+        android:layout_gravity="center">
+
+        <TextView
+            android:id="@+id/connected_device"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/no_watch_connected"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            tools:ignore="HardcodedText" />
+
+        <androidx.gridlayout.widget.GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:padding="10dip"
+            app:columnCount="2">
+
+            <com.google.android.material.button.MaterialButton
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"
+                android:id="@+id/resend"
+                style="@style/GrayButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_refresh"
+                android:paddingLeft="0dp"
+                android:paddingRight="0dp"
+                android:text="@string/resend_all_data"
+                android:textColor="?attr/treatmentButton"
+                app:layout_gravity="fill"
+                app:layout_column="0"
+                app:layout_columnWeight="1"
+                app:layout_row="0" />
+
+            <com.google.android.material.button.MaterialButton
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"
+                android:id="@+id/open_settings"
+                style="@style/GrayButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_settings"
+                android:paddingLeft="0dp"
+                android:paddingRight="0dp"
+                android:text="@string/open_settings_on_wear"
+                android:textColor="?attr/treatmentButton"
+                app:layout_gravity="fill"
+                app:layout_column="1"
+                app:layout_columnWeight="1"
+                app:layout_row="0" />
+
+        </androidx.gridlayout.widget.GridLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -114,6 +185,8 @@
                     app:columnCount="2">
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/load_custom"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -130,6 +203,8 @@
                         app:layout_column="0" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/infos_custom"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -146,6 +221,8 @@
                         app:layout_row="0" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/export_custom"
                         style="@style/GrayButton"
                         android:layout_width="0dp"
@@ -163,6 +240,8 @@
                         app:layout_column="1" />
 
                     <app.aaps.core.ui.elements.SingleClickButton
+                        app:cornerRadius="8dp"
+                        app:strokeColor="@color/colorPrimary"
                         android:id="@+id/more_custom"
                         style="@style/GrayButton"
                         android:layout_width="0dp"

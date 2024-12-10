@@ -39,13 +39,11 @@
         </RelativeLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="319dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="10dp"
-            android:background="?attr/dialogTitleBackground"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/ui_bolwiz_title_bg"
             android:gravity="center_horizontal"
             android:orientation="horizontal"
             android:paddingTop="5dp"
@@ -83,14 +81,17 @@
             android:padding="5dp" />
 
         <TableLayout
-            android:layout_width="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_width="337dp"
             android:layout_height="match_parent"
+            android:layout_gravity="center"
             android:paddingStart="0dp"
             android:paddingEnd="5dp">
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginTop="7dp">
 
                 <TextView
                     android:id="@+id/bg_input_label"
@@ -123,7 +124,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginTop="7dp">
 
                 <TextView
                     android:id="@+id/carbs_input_label"
@@ -157,7 +159,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginTop="7dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -212,7 +215,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -282,32 +286,72 @@
 
             <ToggleButton
                 android:id="@+id/bg_checkbox_icon"
-                style="@style/ToggleBtnStyle"
+                android:background="@drawable/ui_button_states"
+                android:paddingTop="8dp"
+                android:textOn=""
+                android:textOff=""
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:contentDescription="@string/bg_label"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 android:drawableTop="@drawable/checkbox_bg_icon" />
 
             <ToggleButton
                 android:id="@+id/tt_checkbox_icon"
-                style="@style/ToggleBtnStyle"
+                android:background="@drawable/ui_button_states"
+                android:paddingTop="8dp"
+                android:textOn=""
+                android:textOff=""
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:contentDescription="@string/tt_label"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 android:drawableTop="@drawable/checkbox_tt_icon" />
 
             <ToggleButton
                 android:id="@+id/trend_checkbox_icon"
-                style="@style/ToggleBtnStyle"
+                android:background="@drawable/ui_button_states"
+                android:paddingTop="8dp"
+                android:textOn=""
+                android:textOff=""
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:contentDescription="@string/bg_trend_label"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 android:drawableTop="@drawable/checkbox_trend_icon" />
 
             <ToggleButton
                 android:id="@+id/iob_checkbox_icon"
-                style="@style/ToggleBtnStyle"
+                android:background="@drawable/ui_button_states"
+                android:paddingTop="8dp"
+                android:textOn=""
+                android:textOff=""
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:contentDescription="@string/iob"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 android:drawableTop="@drawable/checkbox_iob_icon" />
 
             <ToggleButton
                 android:id="@+id/cob_checkbox_icon"
-                style="@style/ToggleBtnStyle"
+                android:background="@drawable/ui_button_states"
+                android:paddingTop="8dp"
+                android:textOn=""
+                android:textOff=""
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:contentDescription="@string/treatments_wizard_cob_label"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 android:drawableTop="@drawable/checkbox_cob_icon" />
 
         </LinearLayout>
@@ -650,6 +694,7 @@
             android:paddingEnd="5dp">
 
             <CheckBox
+                android:layout_marginStart="7dp"
                 android:id="@+id/calculation_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
