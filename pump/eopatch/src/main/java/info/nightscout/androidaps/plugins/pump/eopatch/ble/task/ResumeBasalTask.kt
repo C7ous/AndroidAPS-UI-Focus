@@ -1,57 +1,51 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import androidx.annotation.NonNull;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.alarm.AlarmCode
+import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry
+import info.nightscout.androidaps.plugins.pump.eopatch.ble.PatchStateManager
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalResume
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BaseResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.alarm.AlarmCode;
-import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry;
-import info.nightscout.androidaps.plugins.pump.eopatch.ble.PatchStateManager;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalResume;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BaseResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class ResumeBasalTask extends TaskBase {
-    @Inject IAlarmRegistry alarmRegistry;
-    @Inject StartNormalBasalTask startNormalBasalTask;
-    @Inject PatchStateManager patchStateManager;
+class ResumeBasalTask @Inject constructor(
+    val alarmRegistry: IAlarmRegistry,
+    val startNormalBasalTask: StartNormalBasalTask,
+    val patchStateManager: PatchStateManager
+) : TaskBase(TaskFunc.RESUME_BASAL) {
 
-    private final BasalResume BASAL_RESUME;
+    private val BASAL_RESUME: BasalResume = BasalResume()
 
-    @Inject
-    public ResumeBasalTask() {
-        super(TaskFunc.RESUME_BASAL);
-        BASAL_RESUME = new BasalResume();
-    }
-
-    public synchronized Single<? extends BaseResponse> resume() {
-        if (pm.getPatchConfig().getNeedSetBasalSchedule()) {
-            return startNormalBasalTask.start(pm.getNormalBasalManager().getNormalBasal());
+    @Synchronized fun resume(): Single<out BaseResponse> {
+        if (patchConfig.needSetBasalSchedule) {
+            return startNormalBasalTask.start(normalBasalManager.normalBasal)
         }
 
-        return isReady().concatMapSingle(v -> BASAL_RESUME.resume())
-                .doOnNext(this::checkResponse)
-                .firstOrError()
-                .doOnSuccess(v -> onResumeResponse(v))
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "ResumeBasalTask error"));
+        return isReady().concatMapSingle<PatchBooleanResponse>(Function { BASAL_RESUME.resume() })
+            .doOnNext(Consumer { response: PatchBooleanResponse -> this.checkResponse(response) })
+            .firstOrError()
+            .doOnSuccess(Consumer { v: PatchBooleanResponse -> this.onResumeResponse(v) })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "ResumeBasalTask error") })
     }
 
-    private void onResumeResponse(@NonNull PatchBooleanResponse v) {
-        if (v.isSuccess()) {
-            patchStateManager.onBasalResumed(v.getTimestamp() + 1000);
-            alarmRegistry.remove(AlarmCode.B001).subscribe();
+    private fun onResumeResponse(v: PatchBooleanResponse) {
+        if (v.isSuccess) {
+            patchStateManager.onBasalResumed(v.getTimestamp() + 1000)
+            alarmRegistry.remove(AlarmCode.B001).subscribe()
         }
-        enqueue(TaskFunc.UPDATE_CONNECTION);
+        enqueue(TaskFunc.UPDATE_CONNECTION)
     }
 
-    @Override
-    protected void preCondition() throws Exception {
-        checkPatchActivated();
-        checkPatchConnected();
+    @Throws(Exception::class) override fun preCondition() {
+        checkPatchActivated()
+        checkPatchConnected()
     }
-
 }

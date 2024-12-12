@@ -1,54 +1,50 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import java.util.concurrent.TimeUnit;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.ble.PatchStateManager
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.UpdateConnection
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.UpdateConnectionResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState.Companion.create
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.ble.PatchStateManager;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.UpdateConnection;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.UpdateConnectionResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class UpdateConnectionTask extends TaskBase {
-    @Inject PatchStateManager patchStateManager;
+class UpdateConnectionTask @Inject constructor(
+    private val patchStateManager: PatchStateManager
+) : TaskBase(TaskFunc.UPDATE_CONNECTION) {
 
-    private final UpdateConnection UPDATE_CONNECTION;
+    private val UPDATE_CONNECTION: UpdateConnection = UpdateConnection()
 
-    @Inject
-    public UpdateConnectionTask() {
-        super(TaskFunc.UPDATE_CONNECTION);
-
-        UPDATE_CONNECTION = new UpdateConnection();
+    fun update(): Single<PatchState> {
+        return isReady().concatMapSingle<PatchState>(Function { updateJob() }).firstOrError()
     }
 
-    public Single<PatchState> update() {
-        return isReady().concatMapSingle(v -> updateJob()).firstOrError();
-    }
-
-    public Single<PatchState> updateJob() {
+    fun updateJob(): Single<PatchState> {
         return UPDATE_CONNECTION.get()
-                .doOnSuccess(this::checkResponse)
-                .map(UpdateConnectionResponse::getPatchState)
-                .map(bytes -> PatchState.Companion.create(bytes, System.currentTimeMillis()))
-                .doOnSuccess(state -> onUpdateConnection(state))
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "UpdateConnectionTask error"));
+            .doOnSuccess(Consumer { response: UpdateConnectionResponse -> this.checkResponse(response) })
+            .map<ByteArray>(Function { obj: UpdateConnectionResponse -> obj.getPatchState() })
+            .map<PatchState>(Function { bytes: ByteArray -> create(bytes, System.currentTimeMillis()) })
+            .doOnSuccess(Consumer { patchState: PatchState -> this.onUpdateConnection(patchState) })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "UpdateConnectionTask error") })
     }
 
-    private void onUpdateConnection(PatchState patchState) {
-        patchStateManager.updatePatchState(patchState);
+    private fun onUpdateConnection(patchState: PatchState) {
+        patchStateManager.updatePatchState(patchState)
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = update()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 }

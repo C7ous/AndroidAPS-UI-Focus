@@ -1,61 +1,57 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import androidx.annotation.NonNull;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.code.BolusExDuration
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BolusStart
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.ComboBolusStart
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.ExtBolusStart
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.code.BolusExDuration;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BolusStart;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.ComboBolusStart;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.ExtBolusStart;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class StartQuickBolusTask extends BolusTask {
-    private final BolusStart NOW_BOLUS_START;
-    private final ExtBolusStart EXT_BOLUS_START;
-    private final ComboBolusStart COMBO_BOLUS_START;
+class StartQuickBolusTask @Inject constructor() : BolusTask(TaskFunc.START_QUICK_BOLUS) {
 
-    @Inject
-    public StartQuickBolusTask() {
-        super(TaskFunc.START_QUICK_BOLUS);
+    private val NOW_BOLUS_START: BolusStart = BolusStart()
+    private val EXT_BOLUS_START: ExtBolusStart = ExtBolusStart()
+    private val COMBO_BOLUS_START: ComboBolusStart = ComboBolusStart()
 
-        NOW_BOLUS_START = new BolusStart();
-        EXT_BOLUS_START = new ExtBolusStart();
-        COMBO_BOLUS_START = new ComboBolusStart();
+    fun start(
+        nowDoseU: Float, exDoseU: Float,
+        exDuration: BolusExDuration
+    ): Single<out BolusResponse> {
+        return isReady().concatMapSingle(Function { startBolusImpl(nowDoseU, exDoseU, exDuration) })
+            .doOnNext { response -> this.checkResponse(response) }
+            .firstOrError()
+            .doOnSuccess { onSuccess(nowDoseU, exDoseU, exDuration) }
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "StartQuickBolusTask error") })
     }
 
-    public Single<? extends BolusResponse> start(float nowDoseU, float exDoseU,
-                                                 @NonNull BolusExDuration exDuration) {
-        return isReady().concatMapSingle(v -> startBolusImpl(nowDoseU, exDoseU, exDuration))
-                .doOnNext(this::checkResponse)
-                .firstOrError()
-                .doOnSuccess(v -> onSuccess(nowDoseU, exDoseU, exDuration))
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "StartQuickBolusTask error"));
-    }
-
-    private Single<? extends BolusResponse> startBolusImpl(float nowDoseU, float exDoseU,
-                                                           BolusExDuration exDuration) {
-        if (nowDoseU > 0 && exDoseU > 0) {
-            return COMBO_BOLUS_START.start(nowDoseU, exDoseU, exDuration.getMinute());
+    private fun startBolusImpl(
+        nowDoseU: Float, exDoseU: Float,
+        exDuration: BolusExDuration
+    ): Single<out BolusResponse> {
+        return if (nowDoseU > 0 && exDoseU > 0) {
+            COMBO_BOLUS_START.start(nowDoseU, exDoseU, exDuration.minute)
         } else if (exDoseU > 0) {
-            return EXT_BOLUS_START.start(exDoseU, exDuration.getMinute());
+            EXT_BOLUS_START.start(exDoseU, exDuration.minute)
         } else {
-            return NOW_BOLUS_START.start(nowDoseU);
+            NOW_BOLUS_START.start(nowDoseU)
         }
     }
 
-    private void onSuccess(float nowDoseU, float exDoseU, BolusExDuration exDuration) {
-        onQuickBolusStarted(nowDoseU, exDoseU, exDuration);
-        enqueue(TaskFunc.UPDATE_CONNECTION);
+    private fun onSuccess(nowDoseU: Float, exDoseU: Float, exDuration: BolusExDuration) {
+        onQuickBolusStarted(nowDoseU, exDoseU, exDuration)
+        enqueue(TaskFunc.UPDATE_CONNECTION)
     }
 
-    @Override
-    protected void preCondition() throws Exception {
+    @Throws(Exception::class) override fun preCondition() {
         //checkPatchActivated();
-        checkPatchConnected();
+        checkPatchConnected()
     }
 }

@@ -43,8 +43,6 @@
             app:layout_constraintTop_toBottomOf="@+id/exam_disabled_to">
 
             <com.google.android.material.button.MaterialButton
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/exam_reset"
                 style="@style/OkCancelButton.Text"
                 android:layout_width="wrap_content"
@@ -58,8 +56,6 @@
                 android:text="" />
 
             <com.google.android.material.button.MaterialButton
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/close"
                 style="@style/OkCancelButton.Text"
                 android:layout_width="wrap_content"
@@ -67,8 +63,6 @@
                 android:text="@string/close" />
 
             <com.google.android.material.button.MaterialButton
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/exam_verify"
                 style="@style/OkCancelButton.Text"
                 android:layout_width="wrap_content"
@@ -129,8 +123,6 @@
             app:layout_constraintTop_toBottomOf="@+id/buttons">
 
             <com.google.android.material.button.MaterialButton
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/back_button"
                 style="@style/OkCancelButton.Text"
                 android:layout_width="wrap_content"
@@ -144,8 +136,6 @@
                 android:text="" />
 
             <com.google.android.material.button.MaterialButton
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/next_button"
                 style="@style/OkCancelButton.Text"
                 android:layout_width="wrap_content"
@@ -153,8 +143,6 @@
                 android:text="@string/objectives_next_button" />
 
             <com.google.android.material.button.MaterialButton
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/next_unanswered_button"
                 style="@style/OkCancelButton.Text"
                 android:layout_width="wrap_content"

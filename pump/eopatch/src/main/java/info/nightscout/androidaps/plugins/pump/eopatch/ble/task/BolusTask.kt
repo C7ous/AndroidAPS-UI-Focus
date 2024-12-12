@@ -1,106 +1,92 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import info.nightscout.androidaps.plugins.pump.eopatch.code.BolusExDuration;
+import info.nightscout.androidaps.plugins.pump.eopatch.AppConstant
+import info.nightscout.androidaps.plugins.pump.eopatch.code.BolusExDuration
+import info.nightscout.androidaps.plugins.pump.eopatch.core.code.BolusType
+import info.nightscout.androidaps.plugins.pump.eopatch.core.util.FloatAdjusters
 
-import info.nightscout.androidaps.plugins.pump.eopatch.AppConstant;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.code.BolusType;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.util.FloatAdjusters;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.BolusCurrent;
+abstract class BolusTask(func: TaskFunc) : TaskBase(func) {
 
-abstract class BolusTask extends TaskBase {
+    fun onQuickBolusStarted(nowDoseU: Float, exDoseU: Float, exDuration: BolusExDuration) {
+        val now = (nowDoseU > 0)
+        val ext = (exDoseU > 0)
 
-    public BolusTask(TaskFunc func) {
-        super(func);
-    }
+        val startTimestamp = if (now) System.currentTimeMillis() else 0
+        val endTimestamp = startTimestamp + getPumpDuration(nowDoseU)
 
-    public void onQuickBolusStarted(float nowDoseU, float exDoseU, BolusExDuration exDuration) {
-        boolean now = (nowDoseU > 0);
-        boolean ext = (exDoseU > 0);
-
-        long startTimestamp = now ? System.currentTimeMillis() : 0;
-        long endTimestamp = startTimestamp + getPumpDuration(nowDoseU);
-
-        long nowHistoryID = 1L;  //record no
-        long exStartTimestamp;
+        val nowHistoryID = 1L //record no
+        var exStartTimestamp: Long
 
         if (now) {
-            pm.getBolusCurrent().startNowBolus(nowHistoryID, nowDoseU, startTimestamp, endTimestamp);
+            pm.bolusCurrent.startNowBolus(nowHistoryID, nowDoseU, startTimestamp, endTimestamp)
         }
         if (ext) {
-            long estimatedExStartTimestamp;
+            var estimatedExStartTimestamp: Long
 
             if (now) {
-                exStartTimestamp = 0;
+                exStartTimestamp = 0
+            } else {
+                estimatedExStartTimestamp = System.currentTimeMillis()
+                exStartTimestamp = estimatedExStartTimestamp
             }
-            else {
-                estimatedExStartTimestamp = System.currentTimeMillis();
-                exStartTimestamp = estimatedExStartTimestamp;
-            }
-            long exEndTimestamp = exStartTimestamp + exDuration.milli();
+            val exEndTimestamp = exStartTimestamp + exDuration.milli()
 
-            long extHistoryID = 2L;  //record no
-            pm.getBolusCurrent().startExtBolus(extHistoryID, exDoseU, exStartTimestamp,
-                    exEndTimestamp, exDuration.milli());
+            val extHistoryID = 2L //record no
+            pm.bolusCurrent.startExtBolus(
+                extHistoryID, exDoseU, exStartTimestamp,
+                exEndTimestamp, exDuration.milli()
+            )
         }
 
-        pm.flushBolusCurrent();
+        pm.flushBolusCurrent()
     }
 
+    fun onCalcBolusStarted(nowDoseU: Float) {
+        val now = (nowDoseU > 0)
 
-    public void onCalcBolusStarted(float nowDoseU) {
-        boolean now = (nowDoseU > 0);
+        val startTimestamp = if (now) System.currentTimeMillis() else 0 // dm_1720
+        val endTimestamp = startTimestamp + getPumpDuration(nowDoseU)
 
-        long startTimestamp = now ? System.currentTimeMillis() : 0;     // dm_1720
-        long endTimestamp = startTimestamp + getPumpDuration(nowDoseU);
-
-        long nowHistoryID = 1L;  //record no
+        val nowHistoryID = 1L //record no
 
         if (now) {
-            pm.getBolusCurrent().startNowBolus(nowHistoryID, nowDoseU, startTimestamp, endTimestamp);
+            pm.bolusCurrent.startNowBolus(nowHistoryID, nowDoseU, startTimestamp, endTimestamp)
         }
 
-        pm.flushBolusCurrent();
+        pm.flushBolusCurrent()
     }
 
-    public void updateNowBolusStopped(int injected) {
-        updateNowBolusStopped(injected, 0);
-    }
-
-    public void updateNowBolusStopped(int injected, long suspendedTimestamp) {
-        BolusCurrent bolusCurrent = pm.getBolusCurrent();
-        long nowID = bolusCurrent.historyId(BolusType.NOW);
+    fun updateNowBolusStopped(injected: Int, suspendedTimestamp: Long = 0) {
+        val bolusCurrent = pm.bolusCurrent
+        val nowID = bolusCurrent.historyId(BolusType.NOW)
         if (nowID > 0 && !bolusCurrent.endTimeSynced(BolusType.NOW)) {
-            long stopTime = (suspendedTimestamp > 0) ? suspendedTimestamp : System.currentTimeMillis();
-            float injectedDoseU = FloatAdjusters.FLOOR2_BOLUS.apply(injected * AppConstant.INSULIN_UNIT_P);
-            bolusCurrent.getNowBolus().setInjected(injectedDoseU);
-            bolusCurrent.getNowBolus().setEndTimestamp(stopTime);
-            bolusCurrent.setEndTimeSynced(BolusType.NOW, true);
-            pm.flushBolusCurrent();
+            val stopTime = if ((suspendedTimestamp > 0)) suspendedTimestamp else System.currentTimeMillis()
+            val injectedDoseU = FloatAdjusters.FLOOR2_BOLUS.apply(injected * AppConstant.INSULIN_UNIT_P)
+            bolusCurrent.nowBolus.injected = injectedDoseU
+            bolusCurrent.nowBolus.endTimestamp = stopTime
+            bolusCurrent.setEndTimeSynced(BolusType.NOW, true)
+            pm.flushBolusCurrent()
         }
     }
 
-    public void updateExtBolusStopped(int injected) {
-        updateExtBolusStopped(injected, 0);
-    }
-
-    public void updateExtBolusStopped(int injected, long suspendedTimestamp) {
-        BolusCurrent bolusCurrent = pm.getBolusCurrent();
-        long extID = bolusCurrent.historyId(BolusType.EXT);
+    fun updateExtBolusStopped(injected: Int, suspendedTimestamp: Long = 0) {
+        val bolusCurrent = pm.bolusCurrent
+        val extID = bolusCurrent.historyId(BolusType.EXT)
         if (extID > 0 && !bolusCurrent.endTimeSynced(BolusType.EXT)) {
-            long stopTime = (suspendedTimestamp > 0) ? suspendedTimestamp : System.currentTimeMillis();
-            float injectedDoseU = FloatAdjusters.FLOOR2_BOLUS.apply(injected * AppConstant.INSULIN_UNIT_P);
-            bolusCurrent.getExtBolus().setInjected(injectedDoseU);
-            bolusCurrent.getExtBolus().setEndTimestamp(stopTime);
-            bolusCurrent.setEndTimeSynced(BolusType.EXT, true);
-            pm.flushBolusCurrent();
+            val stopTime = if ((suspendedTimestamp > 0)) suspendedTimestamp else System.currentTimeMillis()
+            val injectedDoseU = FloatAdjusters.FLOOR2_BOLUS.apply(injected * AppConstant.INSULIN_UNIT_P)
+            bolusCurrent.extBolus.injected = injectedDoseU
+            bolusCurrent.extBolus.endTimestamp = stopTime
+            bolusCurrent.setEndTimeSynced(BolusType.EXT, true)
+            pm.flushBolusCurrent()
         }
     }
 
-    private long getPumpDuration(float doseU) {
+    private fun getPumpDuration(doseU: Float): Long {
         if (doseU > 0) {
-            long pumpDuration = pm.getPatchConfig().getPumpDurationSmallMilli();
-            return (long) ((doseU / AppConstant.BOLUS_UNIT_STEP) * pumpDuration);
+            val pumpDuration = patchConfig.pumpDurationSmallMilli
+            return ((doseU / AppConstant.BOLUS_UNIT_STEP) * pumpDuration).toLong()
         }
-        return 0L;
+        return 0L
     }
 }

@@ -1,85 +1,78 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import androidx.annotation.NonNull;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BolusStop
+import info.nightscout.androidaps.plugins.pump.eopatch.core.code.PatchBleResultCode
+import info.nightscout.androidaps.plugins.pump.eopatch.core.define.IPatchConstant
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusStopResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.ComboBolusStopResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.BiFunction
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BolusStop;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.code.PatchBleResultCode;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.define.IPatchConstant;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusStopResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.ComboBolusStopResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class StopComboBolusTask extends BolusTask {
-    private final BolusStop BOLUS_STOP;
+class StopComboBolusTask @Inject constructor() : BolusTask(TaskFunc.STOP_COMBO_BOLUS) {
 
-    @Inject
-    public StopComboBolusTask() {
-        super(TaskFunc.STOP_COMBO_BOLUS);
-        BOLUS_STOP = new BolusStop();
-    }
+    private val BOLUS_STOP: BolusStop = BolusStop()
 
-    public Single<ComboBolusStopResponse> stop() {
+    fun stop(): Single<ComboBolusStopResponse> {
         return isReady()
-                .concatMapSingle(v -> stopJob())
-                .firstOrError()
-                .doOnSuccess(this::checkResponse)
-                .doOnSuccess(this::onComboBolusStopped)
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "StopComboBolusTask error"));
+            .concatMapSingle<ComboBolusStopResponse>(Function { stopJob() })
+            .firstOrError()
+            .doOnSuccess(Consumer { response: ComboBolusStopResponse -> this.checkResponse(response) })
+            .doOnSuccess(Consumer { response: ComboBolusStopResponse -> this.onComboBolusStopped(response) })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "StopComboBolusTask error") })
     }
 
-    public Single<ComboBolusStopResponse> stopJob() {
-        return Single.zip(
-                BOLUS_STOP.stop(IPatchConstant.EXT_BOLUS_ID),
-                BOLUS_STOP.stop(IPatchConstant.NOW_BOLUS_ID),
-                (ext, now) -> createStopComboBolusResponse(now, ext));
+    fun stopJob(): Single<ComboBolusStopResponse> {
+        return Single.zip<BolusStopResponse, BolusStopResponse, ComboBolusStopResponse>(
+            BOLUS_STOP.stop(IPatchConstant.EXT_BOLUS_ID.toInt()),
+            BOLUS_STOP.stop(IPatchConstant.NOW_BOLUS_ID.toInt()),
+            BiFunction { ext: BolusStopResponse, now: BolusStopResponse -> createStopComboBolusResponse(now, ext) })
     }
 
-    @NonNull private ComboBolusStopResponse createStopComboBolusResponse(BolusStopResponse now, @NonNull BolusStopResponse ext) {
-        int idNow = now.isSuccess() ? IPatchConstant.NOW_BOLUS_ID : 0;
-        int idExt = ext.isSuccess() ? IPatchConstant.EXT_BOLUS_ID : 0;
+    private fun createStopComboBolusResponse(now: BolusStopResponse, ext: BolusStopResponse): ComboBolusStopResponse {
+        val idNow = (if (now.isSuccess) IPatchConstant.NOW_BOLUS_ID else 0).toInt()
+        val idExt = (if (ext.isSuccess) IPatchConstant.EXT_BOLUS_ID else 0).toInt()
 
-        int injectedAmount = now.getInjectedBolusAmount();
-        int injectingAmount = now.getInjectingBolusAmount();
+        val injectedAmount = now.injectedBolusAmount
+        val injectingAmount = now.injectingBolusAmount
 
-        int injectedExAmount = ext.getInjectedBolusAmount();
-        int injectingExAmount = ext.getInjectingBolusAmount();
+        val injectedExAmount = ext.injectedBolusAmount
+        val injectingExAmount = ext.injectingBolusAmount
 
         if (idNow == 0 && idExt == 0) {
-            return new ComboBolusStopResponse(IPatchConstant.NOW_BOLUS_ID, PatchBleResultCode.BOLUS_UNKNOWN_ID);
+            return ComboBolusStopResponse(IPatchConstant.NOW_BOLUS_ID.toInt(), PatchBleResultCode.BOLUS_UNKNOWN_ID)
         }
 
-        return new ComboBolusStopResponse(idNow, injectedAmount, injectingAmount, idExt, injectedExAmount, injectingExAmount);
+        return ComboBolusStopResponse(idNow, injectedAmount, injectingAmount, idExt, injectedExAmount, injectingExAmount)
     }
 
-    private void onComboBolusStopped(ComboBolusStopResponse response) {
-        if (response.getId() != 0)
-            updateNowBolusStopped(response.getInjectedBolusAmount());
+    private fun onComboBolusStopped(response: ComboBolusStopResponse) {
+        if (response.id != 0) updateNowBolusStopped(response.injectedBolusAmount)
 
-        if (response.getExtId() != 0)
-            updateExtBolusStopped(response.getInjectedExBolusAmount());
+        if (response.extId != 0) updateExtBolusStopped(response.injectedExBolusAmount)
 
-        enqueue(TaskFunc.UPDATE_CONNECTION);
+        enqueue(TaskFunc.UPDATE_CONNECTION)
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = stop()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 
-    @Override
-    protected void preCondition() throws Exception {
-        checkPatchConnected();
+    @Throws(Exception::class) override fun preCondition() {
+        checkPatchConnected()
     }
 }

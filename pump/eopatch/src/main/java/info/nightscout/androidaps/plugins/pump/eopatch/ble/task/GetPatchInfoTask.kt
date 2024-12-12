@@ -1,112 +1,102 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import androidx.annotation.NonNull;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetFirmwareVersion
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetLOT
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetModelName
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetPumpDuration
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetSerialNumber
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetWakeUpTime
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.SetGlobalTime
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BaseResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.FirmwareVersionResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.LotNumberResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.ModelNameResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PumpDurationResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.SerialNumberResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.WakeUpTimeResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import io.reactivex.rxjava3.functions.Predicate
+import io.reactivex.rxjava3.schedulers.Schedulers
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import java.util.Arrays;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetFirmwareVersion;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetLOT;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetModelName;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetPumpDuration;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetSerialNumber;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetWakeUpTime;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.SetGlobalTime;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BaseResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.FirmwareVersionResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.LotNumberResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.ModelNameResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PumpDurationResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.SerialNumberResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.WakeUpTimeResponse;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class GetPatchInfoTask extends TaskBase {
-    @Inject UpdateConnectionTask updateConnectionTask;
+class GetPatchInfoTask @Inject constructor(
+    val updateConnectionTask: UpdateConnectionTask
+) : TaskBase(TaskFunc.GET_PATCH_INFO) {
 
-    private final SetGlobalTime SET_GLOBAL_TIME;
-    @NonNull private final GetSerialNumber SERIAL_NUMBER_GET;
-    private final GetLOT LOT_NUMBER_GET;
-    private final GetFirmwareVersion FIRMWARE_VERSION_GET;
-    @NonNull private final GetWakeUpTime WAKE_UP_TIME_GET;
-    @NonNull private final GetPumpDuration PUMP_DURATION_GET;
-    private final GetModelName GET_MODEL_NAME;
+    private val SET_GLOBAL_TIME: SetGlobalTime = SetGlobalTime()
+    private val SERIAL_NUMBER_GET: GetSerialNumber = GetSerialNumber()
+    private val LOT_NUMBER_GET: GetLOT = GetLOT()
+    private val FIRMWARE_VERSION_GET: GetFirmwareVersion = GetFirmwareVersion()
+    private val WAKE_UP_TIME_GET: GetWakeUpTime = GetWakeUpTime()
+    private val PUMP_DURATION_GET: GetPumpDuration = GetPumpDuration()
+    private val GET_MODEL_NAME: GetModelName = GetModelName()
 
-    @Inject
-    public GetPatchInfoTask() {
-        super(TaskFunc.GET_PATCH_INFO);
-
-        SET_GLOBAL_TIME = new SetGlobalTime();
-        SERIAL_NUMBER_GET = new GetSerialNumber();
-        LOT_NUMBER_GET = new GetLOT();
-        FIRMWARE_VERSION_GET = new GetFirmwareVersion();
-        WAKE_UP_TIME_GET = new GetWakeUpTime();
-        PUMP_DURATION_GET = new GetPumpDuration();
-        GET_MODEL_NAME = new GetModelName();
-    }
-
-    public Single<Boolean> get() {
-        Single<Boolean> tasks = Single.concat(Arrays.asList(
-                        SET_GLOBAL_TIME.set(),
-                        SERIAL_NUMBER_GET.get().doOnSuccess(this::onSerialNumberResponse),
-                        LOT_NUMBER_GET.get().doOnSuccess(this::onLotNumberResponse),
-                        FIRMWARE_VERSION_GET.get().doOnSuccess(this::onFirmwareResponse),
-                        WAKE_UP_TIME_GET.get().doOnSuccess(this::onWakeupTimeResponse),
-                        PUMP_DURATION_GET.get().doOnSuccess(this::onPumpDurationResponse),
-                        GET_MODEL_NAME.get().doOnSuccess(this::onModelNameResponse)))
-                .map(BaseResponse::isSuccess)
-                .filter(v -> !v)
-                .first(true);
+    fun get(): Single<Boolean> {
+        val tasks: Single<Boolean> = Single.concat<BaseResponse>(
+            listOf<Single<out BaseResponse>>(
+                SET_GLOBAL_TIME.set(),
+                SERIAL_NUMBER_GET.get().doOnSuccess(Consumer { v: SerialNumberResponse -> this.onSerialNumberResponse(v) }),
+                LOT_NUMBER_GET.get().doOnSuccess(Consumer { v: LotNumberResponse -> this.onLotNumberResponse(v) }),
+                FIRMWARE_VERSION_GET.get().doOnSuccess(Consumer { v: FirmwareVersionResponse -> this.onFirmwareResponse(v) }),
+                WAKE_UP_TIME_GET.get().doOnSuccess(Consumer { v: WakeUpTimeResponse -> this.onWakeupTimeResponse(v) }),
+                PUMP_DURATION_GET.get().doOnSuccess(Consumer { v: PumpDurationResponse -> this.onPumpDurationResponse(v) }),
+                GET_MODEL_NAME.get().doOnSuccess(Consumer { modelNameResponse: ModelNameResponse -> this.onModelNameResponse(modelNameResponse) })
+            )
+        )
+            .map<Boolean>(Function { obj: BaseResponse -> obj.isSuccess })
+            .filter(Predicate { v: Boolean -> !v })
+            .first(true)
 
         return isReady()
-                .concatMapSingle(it -> tasks)
-                .firstOrError()
-                .observeOn(Schedulers.io())
-                .doOnSuccess(this::onPatchWakeupSuccess)
-                .doOnError(this::onPatchWakeupFailed)
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "GetPatchInfoTask error"));
+            .concatMapSingle<Boolean>(Function { tasks })
+            .firstOrError()
+            .observeOn(Schedulers.io())
+            .doOnSuccess(Consumer { this.onPatchWakeupSuccess() })
+            .doOnError(Consumer { this.onPatchWakeupFailed() })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "GetPatchInfoTask error") })
     }
 
-    private void onSerialNumberResponse(SerialNumberResponse v) {
-        pm.getPatchConfig().setPatchSerialNumber(v.getSerialNumber());
+    private fun onSerialNumberResponse(v: SerialNumberResponse) {
+        patchConfig.patchSerialNumber = v.serialNumber
     }
 
-    private void onLotNumberResponse(LotNumberResponse v) {
-        pm.getPatchConfig().setPatchLotNumber(v.getLotNumber());
+    private fun onLotNumberResponse(v: LotNumberResponse) {
+        patchConfig.patchLotNumber = v.lotNumber
     }
 
-    private void onFirmwareResponse(FirmwareVersionResponse v) {
-        pm.getPatchConfig().setPatchFirmwareVersion(v.getFirmwareVersionString());
+    private fun onFirmwareResponse(v: FirmwareVersionResponse) {
+        patchConfig.patchFirmwareVersion = v.firmwareVersionString
     }
 
-    private void onWakeupTimeResponse(@NonNull WakeUpTimeResponse v) {
-        pm.getPatchConfig().setPatchWakeupTimestamp(v.getTimeInMillis());
+    private fun onWakeupTimeResponse(v: WakeUpTimeResponse) {
+        patchConfig.patchWakeupTimestamp = v.timeInMillis
     }
 
-    private void onPumpDurationResponse(PumpDurationResponse v) {
-        pm.getPatchConfig().setPumpDurationLargeMilli(v.getDurationL() * 100L);
-        pm.getPatchConfig().setPumpDurationMediumMilli(v.getDurationM() * 100L);
-        pm.getPatchConfig().setPumpDurationSmallMilli(v.getDurationS() * 100L);
+    private fun onPumpDurationResponse(v: PumpDurationResponse) {
+        patchConfig.pumpDurationLargeMilli = v.durationL * 100L
+        patchConfig.pumpDurationMediumMilli = v.durationM * 100L
+        patchConfig.pumpDurationSmallMilli = v.durationS * 100L
     }
 
-    private void onModelNameResponse(ModelNameResponse modelNameResponse) {
-        pm.getPatchConfig().setPatchModelName(modelNameResponse.getModelName());
+    private fun onModelNameResponse(modelNameResponse: ModelNameResponse) {
+        patchConfig.patchModelName = modelNameResponse.modelName
     }
 
-    private void onPatchWakeupSuccess(Boolean result) {
-        synchronized (lock) {
-            pm.flushPatchConfig();
+    private fun onPatchWakeupSuccess() {
+        synchronized(lock) {
+            pm.flushPatchConfig()
         }
     }
 
-    private void onPatchWakeupFailed(Throwable e) {
-        patch.setSeq(-1);
-        pm.getPatchConfig().updateDeactivated();
-        pm.flushPatchConfig();
+    private fun onPatchWakeupFailed() {
+        patch.setSeq(-1)
+        patchConfig.updateDeactivated()
+        pm.flushPatchConfig()
     }
 }

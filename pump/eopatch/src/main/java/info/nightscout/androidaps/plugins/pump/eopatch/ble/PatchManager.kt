@@ -1,432 +1,238 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble
 
-import android.content.Context;
-import android.content.Intent;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.data.model.TE;
-import app.aaps.core.data.pump.defs.PumpType;
-import app.aaps.core.interfaces.pump.DetailedBolusInfo;
-import app.aaps.core.interfaces.pump.PumpSync;
-import app.aaps.core.interfaces.resources.ResourceHelper;
-import app.aaps.core.interfaces.rx.AapsSchedulers;
-import app.aaps.core.interfaces.rx.bus.RxBus;
-import app.aaps.core.interfaces.rx.events.EventCustomActionsChanged;
-import app.aaps.core.interfaces.rx.events.EventPumpStatusChanged;
-import app.aaps.core.interfaces.rx.events.EventRefreshOverview;
-import app.aaps.core.interfaces.sharedPreferences.SP;
-import app.aaps.core.interfaces.utils.DateUtil;
-import info.nightscout.androidaps.plugins.pump.eopatch.R;
-import info.nightscout.androidaps.plugins.pump.eopatch.RxAction;
-import info.nightscout.androidaps.plugins.pump.eopatch.alarm.AlarmCode;
-import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry;
-import info.nightscout.androidaps.plugins.pump.eopatch.code.BolusExDuration;
-import info.nightscout.androidaps.plugins.pump.eopatch.code.DeactivationStatus;
-import info.nightscout.androidaps.plugins.pump.eopatch.code.PatchLifecycle;
-import info.nightscout.androidaps.plugins.pump.eopatch.code.SettingKeys;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BasalScheduleSetResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BaseResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusStopResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.ComboBolusStopResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.TempBasalScheduleSetResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.TemperatureResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.BleConnectionState;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.IPatchScanner;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.PatchScanner;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.PatchSelfTestResult;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.ScanList;
-import info.nightscout.androidaps.plugins.pump.eopatch.event.EventPatchActivationNotComplete;
-import info.nightscout.androidaps.plugins.pump.eopatch.ui.DialogHelperActivity;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.BolusCurrent;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.NormalBasal;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchConfig;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchLifecycleEvent;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.TempBasal;
-import io.reactivex.rxjava3.core.Maybe;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
+import android.content.Context
+import android.content.Intent
+import app.aaps.core.data.model.TE
+import app.aaps.core.data.pump.defs.PumpType
+import app.aaps.core.interfaces.pump.DetailedBolusInfo
+import app.aaps.core.interfaces.pump.PumpSync
+import app.aaps.core.interfaces.resources.ResourceHelper
+import app.aaps.core.interfaces.rx.AapsSchedulers
+import app.aaps.core.interfaces.rx.bus.RxBus
+import app.aaps.core.interfaces.rx.events.EventCustomActionsChanged
+import app.aaps.core.interfaces.rx.events.EventPumpStatusChanged
+import app.aaps.core.interfaces.rx.events.EventRefreshOverview
+import app.aaps.core.interfaces.sharedPreferences.SP
+import app.aaps.core.interfaces.utils.DateUtil
+import info.nightscout.androidaps.plugins.pump.eopatch.R
+import info.nightscout.androidaps.plugins.pump.eopatch.RxAction
+import info.nightscout.androidaps.plugins.pump.eopatch.alarm.AlarmCode
+import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry
+import info.nightscout.androidaps.plugins.pump.eopatch.code.SettingKeys.Companion.BUZZER_REMINDERS
+import info.nightscout.androidaps.plugins.pump.eopatch.code.SettingKeys.Companion.EXPIRATION_REMINDERS
+import info.nightscout.androidaps.plugins.pump.eopatch.code.SettingKeys.Companion.LOW_RESERVOIR_REMINDERS
+import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.BleConnectionState
+import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.IPatchScanner
+import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.PatchScanner
+import info.nightscout.androidaps.plugins.pump.eopatch.core.scan.ScanList
+import info.nightscout.androidaps.plugins.pump.eopatch.event.EventPatchActivationNotComplete
+import info.nightscout.androidaps.plugins.pump.eopatch.ui.DialogHelperActivity
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.Alarms
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchConfig
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState
+import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import io.reactivex.rxjava3.functions.Predicate
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
-public class PatchManager implements IPatchManager {
+class PatchManager @Inject constructor(
+    private val aapsPatchManager: PatchManagerExecutor,
+    private val pm: PreferenceManager,
+    private val alarms: Alarms,
+    private val patchConfig: PatchConfig,
+    private val rh: ResourceHelper,
+    private val rxBus: RxBus,
+    private val context: Context,
+    private val sp: SP,
+    private val pumpSync: PumpSync,
+    private val dateUtil: DateUtil,
+    private val rxAction: RxAction,
+    private val aapsSchedulers: AapsSchedulers,
+    private val alarmRegistry: IAlarmRegistry
+) : IPatchManager {
 
-    private final CompositeDisposable mCompositeDisposable = new CompositeDisposable();
-    @Inject PatchManagerImpl patchManager;
-    @Inject IPreferenceManager pm;
-    @Inject ResourceHelper resourceHelper;
-    @Inject RxBus rxBus;
-    @Inject Context context;
-    @Inject SP sp;
-    @Inject PumpSync pumpSync;
-    @Inject DateUtil dateUtil;
-    @Inject RxAction rxAction;
-    @Inject AapsSchedulers aapsSchedulers;
-    @Inject IAlarmRegistry alarmRegistry;
-    private IPatchScanner patchScanner;
-    @Nullable private Disposable mConnectingDisposable = null;
+    private val compositeDisposable = CompositeDisposable()
+
+    private var patchScanner: IPatchScanner = PatchScanner(context)
+    private var mConnectingDisposable: Disposable? = null
 
     @Inject
-    public PatchManager() {
-    }
+    fun onInit() {
+        compositeDisposable.add(
+            aapsPatchManager.observePatchConnectionState()
+                .subscribe(Consumer { bleConnectionState: BleConnectionState ->
+                    when (bleConnectionState) {
+                        BleConnectionState.DISCONNECTED -> {
+                            rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
+                            rxBus.send(EventRefreshOverview("Eopatch connection state: " + bleConnectionState.name, true))
+                            rxBus.send(EventCustomActionsChanged())
+                            stopObservingConnection()
+                        }
 
-    @Inject
-    void onInit() {
-        patchScanner = new PatchScanner(context);
+                        BleConnectionState.CONNECTED    -> {
+                            rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
+                            rxBus.send(EventRefreshOverview("Eopatch connection state: " + bleConnectionState.name, true))
+                            rxBus.send(EventCustomActionsChanged())
+                            stopObservingConnection()
+                        }
 
-        mCompositeDisposable.add(observePatchConnectionState()
-                .subscribe(bleConnectionState -> {
-                    switch (bleConnectionState) {
-                        case DISCONNECTED:
-                            rxBus.send(new EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED));
-                            rxBus.send(new EventRefreshOverview("Eopatch connection state: " + bleConnectionState.name(), true));
-                            rxBus.send(new EventCustomActionsChanged());
-                            stopObservingConnection();
-                            break;
+                        BleConnectionState.CONNECTING   -> mConnectingDisposable = Observable.interval(0, 1, TimeUnit.SECONDS)
+                            .observeOn(aapsSchedulers.main)
+                            .takeUntil(Predicate { n: Long -> aapsPatchManager.patchConnectionState.isConnected || n > 10 * 60 })
+                            .subscribe(Consumer { n: Long -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING, n.toInt())) })
 
-                        case CONNECTED:
-                            rxBus.send(new EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED));
-                            rxBus.send(new EventRefreshOverview("Eopatch connection state: " + bleConnectionState.name(), true));
-                            rxBus.send(new EventCustomActionsChanged());
-                            stopObservingConnection();
-                            break;
-
-                        case CONNECTING:
-                            mConnectingDisposable = Observable.interval(0, 1, TimeUnit.SECONDS)
-                                    .observeOn(aapsSchedulers.getMain())
-                                    .takeUntil(n -> getPatchConnectionState().isConnected() || n > 10 * 60)
-                                    .subscribe(n -> rxBus.send(new EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING, n.intValue())));
-                            break;
-
-                        default:
-                            stopObservingConnection();
+                        else                            -> stopObservingConnection()
                     }
                 })
-        );
-        mCompositeDisposable.add(rxBus
-                .toObservable(EventPatchActivationNotComplete.class)
-                .observeOn(aapsSchedulers.getIo())
-                .subscribeOn(aapsSchedulers.getMain())
-                .subscribe(eventPatchActivationNotComplete -> {
-                    Intent i = new Intent(context, DialogHelperActivity.class);
-                    i.putExtra("title", resourceHelper.gs(R.string.patch_activate_reminder_title));
-                    i.putExtra("message", resourceHelper.gs(R.string.patch_activate_reminder_desc));
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(i);
+        )
+        compositeDisposable.add(
+            rxBus
+                .toObservable<EventPatchActivationNotComplete>(EventPatchActivationNotComplete::class.java)
+                .observeOn(aapsSchedulers.io)
+                .subscribeOn(aapsSchedulers.main)
+                .subscribe(Consumer {
+                    val i = Intent(context, DialogHelperActivity::class.java)
+                    i.putExtra("title", rh.gs(R.string.patch_activate_reminder_title))
+                    i.putExtra("message", rh.gs(R.string.patch_activate_reminder_desc))
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(i)
                 })
-        );
-
+        )
     }
 
-    @Override
-    public void init() {
-        setConnection();
+    override fun init() {
+        setConnection()
     }
 
-    private void stopObservingConnection() {
+    private fun stopObservingConnection() {
         if (mConnectingDisposable != null) {
-            mConnectingDisposable.dispose();
-            mConnectingDisposable = null;
+            mConnectingDisposable!!.dispose()
+            mConnectingDisposable = null
         }
     }
 
-    @Override
-    public IPreferenceManager getPreferenceManager() {
-        return pm;
+    override fun updatePatchState(state: PatchState) {
+        pm.patchState.update(state)
+        pm.flushPatchState()
     }
 
-    @NonNull @Override
-    public PatchConfig getPatchConfig() {
-        return pm.getPatchConfig();
-    }
-
-    @Override
-    public Observable<PatchLifecycle> observePatchLifeCycle() {
-        return pm.observePatchLifeCycle();
-    }
-
-    @Override
-    public synchronized void updatePatchLifeCycle(PatchLifecycleEvent event) {
-        pm.updatePatchLifeCycle(event);
-    }
-
-    @Override
-    public BleConnectionState getPatchConnectionState() {
-        return patchManager.getPatchConnectionState();
-    }
-
-    @Override
-    public Observable<BleConnectionState> observePatchConnectionState() {
-        return patchManager.observePatchConnectionState();
-    }
-
-    @Override
-    public PatchState getPatchState() {
-        return pm.getPatchState();
-    }
-
-    @Override
-    public void updatePatchState(@NonNull PatchState state) {
-        pm.getPatchState().update(state);
-        pm.flushPatchState();
-    }
-
-    @Override
-    public Observable<PatchState> observePatchState() {
-        return pm.observePatchState();
-    }
-
-    @Override
-    public long getPatchExpiredTime() {
-        return pm.getPatchConfig().getPatchExpiredTime();
-    }
-
-    @Override
-    public BolusCurrent getBolusCurrent() {
-        return pm.getBolusCurrent();
-    }
-
-    @Override
-    public Observable<BolusCurrent> observeBolusCurrent() {
-        return pm.observeBolusCurrent();
-    }
-
-
-    public void connect() {
-        // Nothing (Auto Connect mode)
-    }
-
-    public void disconnect() {
-        // Nothing (Auto Connect mode)
-    }
-
-    @Override
-    public void setConnection() {
-        if (pm.getPatchConfig().hasMacAddress()) {
-            patchManager.updateMacAddress(pm.getPatchConfig().getMacAddress(), false);
+    override fun setConnection() {
+        if (patchConfig.hasMacAddress()) {
+            aapsPatchManager.updateMacAddress(patchConfig.macAddress!!, false)
         }
     }
 
-    public boolean isActivated() {
-        return pm.getPatchConfig().isActivated();
+    override fun patchActivation(timeout: Long): Single<Boolean> {
+        return aapsPatchManager.patchActivation(timeout)
+            .doOnSuccess(Consumer { success: Boolean ->
+                if (success) {
+                    pumpSync.connectNewPump(true)
+                    Thread.sleep(1000)
+                    pumpSync.insertTherapyEventIfNewWithTimestamp(
+                        System.currentTimeMillis(),
+                        TE.Type.CANNULA_CHANGE,
+                        null,
+                        null,
+                        PumpType.EOFLOW_EOPATCH2,
+                        patchConfig.patchSerialNumber
+                    )
+                    pumpSync.insertTherapyEventIfNewWithTimestamp(
+                        System.currentTimeMillis(),
+                        TE.Type.INSULIN_CHANGE,
+                        null,
+                        null,
+                        PumpType.EOFLOW_EOPATCH2,
+                        patchConfig.patchSerialNumber
+                    )
+                }
+            })
     }
 
-    public boolean isDeactivated() {
-        return pm.getPatchConfig().isDeactivated();
+    override fun scan(timeout: Long): Single<ScanList> {
+        aapsPatchManager.updateMacAddress("", false)
+        patchConfig.macAddress = ""
+        return patchScanner.scan(timeout)
     }
 
-    public Single<Boolean> startBond(String mac) {
-        return patchManager.startBond(mac);
-    }
-
-    public Single<Boolean> getPatchInfo(long timeout) {
-        return patchManager.getPatchInfo(timeout);
-    }
-
-    public Single<PatchSelfTestResult> selfTest(long timeout) {
-        return patchManager.selfTest(timeout);
-    }
-
-    public Single<TemperatureResponse> getTemperature() {
-        return patchManager.getTemperature();
-    }
-
-    public Observable<Long> startPriming(long timeout, long count) {
-        return patchManager.startPriming(timeout, count);
-    }
-
-    public Single<Boolean> checkNeedleSensing(long timeout) {
-        return patchManager.checkNeedleSensing(timeout);
-    }
-
-    public Single<Boolean> patchActivation(long timeout) {
-        return patchManager.patchActivation(timeout)
-                .doOnSuccess(success -> {
-                    if (success) {
-                        pumpSync.connectNewPump(true);
-                        Thread.sleep(1000);
-                        pumpSync.insertTherapyEventIfNewWithTimestamp(
-                                System.currentTimeMillis(),
-                                TE.Type.CANNULA_CHANGE,
-                                null,
-                                null,
-                                PumpType.EOFLOW_EOPATCH2,
-                                getPatchConfig().getPatchSerialNumber()
-                        );
-                        pumpSync.insertTherapyEventIfNewWithTimestamp(
-                                System.currentTimeMillis(),
-                                TE.Type.INSULIN_CHANGE,
-                                null,
-                                null,
-                                PumpType.EOFLOW_EOPATCH2,
-                                getPatchConfig().getPatchSerialNumber()
-                        );
-                    }
-                });
-    }
-
-    public Single<BasalScheduleSetResponse> startBasal(NormalBasal basal) {
-        return patchManager.startBasal(basal);
-    }
-
-    public Single<? extends BaseResponse> resumeBasal() {
-        return patchManager.resumeBasal();
-    }
-
-
-    public Single<? extends BaseResponse> pauseBasal(float pauseDurationHour) {
-        return patchManager.pauseBasal(pauseDurationHour);
-    }
-
-    //==============================================================================================
-    // IPatchManager interface [TEMP BASAL]
-    //==============================================================================================
-
-    public Single<TempBasalScheduleSetResponse> startTempBasal(TempBasal tempBasal) {
-        return patchManager.startTempBasal(tempBasal);
-    }
-
-    // 템프베이젤 주입 정지
-    // 템프베이젤이 정지되면 자동으로 노멀베이젤이 활성화된다
-    // 외부에서 호출된다. 즉 명시적으로 tempBasal 정지. 이 때는 normalBasal resume 은 PatchState 보고 처리.
-
-    public Single<PatchBooleanResponse> stopTempBasal() {
-        return patchManager.stopTempBasal();
-    }
-
-
-    public Single<? extends BolusResponse> startQuickBolus(float nowDoseU, float exDoseU,
-                                                           BolusExDuration exDuration) {
-        return patchManager.startQuickBolus(nowDoseU, exDoseU, exDuration);
-    }
-
-
-    public Single<? extends BolusResponse> startCalculatorBolus(DetailedBolusInfo detailedBolusInfo) {
-        return patchManager.startCalculatorBolus(detailedBolusInfo);
-    }
-
-
-    public Single<BolusStopResponse> stopNowBolus() {
-        return patchManager.stopNowBolus();
-    }
-
-
-    public Single<BolusStopResponse> stopExtBolus() {
-        return patchManager.stopExtBolus();
-    }
-
-
-    public Single<ComboBolusStopResponse> stopComboBolus() {
-        return patchManager.stopComboBolus();
-    }
-
-    public Single<DeactivationStatus> deactivate(long timeout, boolean force) {
-        return patchManager.deactivate(timeout, force);
-    }
-
-    public Single<PatchBooleanResponse> infoReminderSet(boolean infoReminder) {
-        return patchManager.infoReminderSet(infoReminder);
-    }
-
-    public Single<PatchBooleanResponse> setLowReservoir(int doseUnit, int hours) {
-        return patchManager.setLowReservoir(doseUnit, hours);
-    }
-
-    public Single<PatchState> updateConnection() {
-        return patchManager.updateConnection();
-    }
-
-    public Single<PatchBooleanResponse> stopAeBeep(int aeCode) {
-        return patchManager.stopAeBeep(aeCode);
-    }
-
-    @Override
-    public Single<ScanList> scan(long timeout) {
-        patchManager.updateMacAddress("", false);
-        pm.getPatchConfig().setMacAddress("");
-        return patchScanner.scan(timeout);
-    }
-
-    @Override
-    public void addBolusToHistory(DetailedBolusInfo originalDetailedBolusInfo) {
-        DetailedBolusInfo detailedBolusInfo = originalDetailedBolusInfo.copy();
+    override fun addBolusToHistory(originalDetailedBolusInfo: DetailedBolusInfo) {
+        val detailedBolusInfo = originalDetailedBolusInfo.copy()
 
         if (detailedBolusInfo.insulin > 0) {
             pumpSync.syncBolusWithPumpId(
-                    dateUtil.now(), // Use real timestamp to have it different from carbs (otherwise NS sync fail)
-                    detailedBolusInfo.insulin,
-                    detailedBolusInfo.getBolusType(),
-                    dateUtil.now(),
-                    PumpType.EOFLOW_EOPATCH2,
-                    patchManager.pm.getPatchSerial()
-            );
+                dateUtil.now(),  // Use real timestamp to have it different from carbs (otherwise NS sync fail)
+                detailedBolusInfo.insulin,
+                detailedBolusInfo.bolusType,
+                dateUtil.now(),
+                PumpType.EOFLOW_EOPATCH2,
+                patchConfig.patchSerialNumber
+            )
         }
     }
 
-    @Override
-    public void changeBuzzerSetting() {
-        boolean buzzer = sp.getBoolean(SettingKeys.Companion.getBUZZER_REMINDERS(), false);
-        if (pm.getPatchConfig().getInfoReminder() != buzzer) {
-            if (isActivated()) {
-                mCompositeDisposable.add(infoReminderSet(buzzer)
-                        .observeOn(aapsSchedulers.getMain())
-                        .subscribe(patchBooleanResponse -> {
-                            pm.getPatchConfig().setInfoReminder(buzzer);
-                            pm.flushPatchConfig();
-                        }));
+    override fun changeBuzzerSetting() {
+        val buzzer = sp.getBoolean(BUZZER_REMINDERS, false)
+        if (patchConfig.infoReminder != buzzer) {
+            if (patchConfig.isActivated) {
+                compositeDisposable.add(
+                    aapsPatchManager.infoReminderSet(buzzer)
+                        .observeOn(aapsSchedulers.main)
+                        .subscribe(Consumer {
+                            patchConfig.infoReminder = buzzer
+                            pm.flushPatchConfig()
+                        })
+                )
             } else {
-                pm.getPatchConfig().setInfoReminder(buzzer);
-                pm.flushPatchConfig();
+                patchConfig.infoReminder = buzzer
+                pm.flushPatchConfig()
             }
         }
     }
 
-    @Override
-    public void changeReminderSetting() {
-        int doseUnit = sp.getInt(SettingKeys.Companion.getLOW_RESERVOIR_REMINDERS(), 0);
-        int hours = sp.getInt(SettingKeys.Companion.getEXPIRATION_REMINDERS(), 0);
-        PatchConfig pc = pm.getPatchConfig();
-        if (pc.getLowReservoirAlertAmount() != doseUnit || pc.getPatchExpireAlertTime() != hours) {
-            if (isActivated()) {
-                mCompositeDisposable.add(setLowReservoir(doseUnit, hours)
-                        .observeOn(aapsSchedulers.getMain())
-                        .doOnSubscribe(disposable -> {
-                            if (pc.getPatchExpireAlertTime() != hours) {
-                                Maybe.just(AlarmCode.B000)
-                                        .flatMap(alarmCode -> alarmRegistry.remove(alarmCode))
-                                        .flatMap(alarmCode -> alarmRegistry.add(alarmCode, (pc.getExpireTimestamp() - System.currentTimeMillis() - TimeUnit.HOURS.toMillis(hours)), false))
-                                        .subscribe();
+    override fun changeReminderSetting() {
+        val doseUnit = sp.getInt(LOW_RESERVOIR_REMINDERS, 0)
+        val hours = sp.getInt(EXPIRATION_REMINDERS, 0)
+        val pc: PatchConfig = patchConfig
+        if (pc.lowReservoirAlertAmount != doseUnit || pc.patchExpireAlertTime != hours) {
+            if (patchConfig.isActivated) {
+                compositeDisposable.add(
+                    aapsPatchManager.setLowReservoir(doseUnit, hours)
+                        .observeOn(aapsSchedulers.main)
+                        .doOnSubscribe(Consumer {
+                            if (pc.patchExpireAlertTime != hours) {
+                                Maybe.just<AlarmCode>(AlarmCode.B000)
+                                    .flatMap<AlarmCode>(Function { alarmCode: AlarmCode -> alarmRegistry.remove(alarmCode) })
+                                    .flatMap<AlarmCode>(Function { alarmCode: AlarmCode -> alarmRegistry.add(alarmCode, (pc.expireTimestamp - System.currentTimeMillis() - TimeUnit.HOURS.toMillis(hours.toLong())), false) })
+                                    .subscribe()
                             }
                         })
-                        .subscribe(patchBooleanResponse -> {
-                            pc.setLowReservoirAlertAmount(doseUnit);
-                            pc.setPatchExpireAlertTime(hours);
-                            pm.flushPatchConfig();
-                        }));
+                        .subscribe(Consumer {
+                            pc.lowReservoirAlertAmount = doseUnit
+                            pc.patchExpireAlertTime = hours
+                            pm.flushPatchConfig()
+                        })
+                )
             } else {
-                pc.setLowReservoirAlertAmount(doseUnit);
-                pc.setPatchExpireAlertTime(hours);
-                pm.flushPatchConfig();
+                pc.lowReservoirAlertAmount = doseUnit
+                pc.patchExpireAlertTime = hours
+                pm.flushPatchConfig()
             }
         }
     }
 
-    @Override
-    public void checkActivationProcess() {
-        if (getPatchConfig().getLifecycleEvent().isSubStepRunning()
-                && !pm.getAlarms().isOccurring(AlarmCode.A005)
-                && !pm.getAlarms().isOccurring(AlarmCode.A020)) {
-            rxAction.runOnMainThread(() -> rxBus.send(new EventPatchActivationNotComplete()));
+    override fun checkActivationProcess() {
+        if (patchConfig.lifecycleEvent.isSubStepRunning
+            && !alarms.isOccurring(AlarmCode.A005)
+            && !alarms.isOccurring(AlarmCode.A020)
+        ) {
+            rxAction.runOnMainThread(Runnable { rxBus.send(EventPatchActivationNotComplete()) })
         }
     }
 }

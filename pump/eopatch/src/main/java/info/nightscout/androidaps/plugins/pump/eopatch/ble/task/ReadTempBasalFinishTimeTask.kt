@@ -1,45 +1,40 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalFinishTimeGet
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.TempBasalFinishTimeResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalFinishTimeGet;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.TempBasalFinishTimeResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class ReadTempBasalFinishTimeTask extends TaskBase {
-    private final TempBasalFinishTimeGet TEMP_BASAL_FINISH_TIME_GET;
+class ReadTempBasalFinishTimeTask @Inject constructor() : TaskBase(TaskFunc.READ_TEMP_BASAL_FINISH_TIME) {
 
-    @Inject
-    public ReadTempBasalFinishTimeTask() {
-        super(TaskFunc.READ_TEMP_BASAL_FINISH_TIME);
-        TEMP_BASAL_FINISH_TIME_GET = new TempBasalFinishTimeGet();
-    }
+    private val TEMP_BASAL_FINISH_TIME_GET: TempBasalFinishTimeGet = TempBasalFinishTimeGet()
 
-    public Single<TempBasalFinishTimeResponse> read() {
+    fun read(): Single<TempBasalFinishTimeResponse> {
         return isReady()
-                .concatMapSingle(v -> TEMP_BASAL_FINISH_TIME_GET.get())
-                .firstOrError()
-                .doOnSuccess(this::checkResponse)
-                .doOnSuccess(this::onResponse)
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "ReadTempBasalFinishTimeTask error"));
+            .concatMapSingle<TempBasalFinishTimeResponse>(Function { TEMP_BASAL_FINISH_TIME_GET.get() })
+            .firstOrError()
+            .doOnSuccess(Consumer { response: TempBasalFinishTimeResponse -> this.checkResponse(response) })
+            .doOnSuccess(Consumer { this.onResponse() })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "ReadTempBasalFinishTimeTask error") })
     }
 
-    private void onResponse(TempBasalFinishTimeResponse response) {
+    private fun onResponse() {
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = read()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 }

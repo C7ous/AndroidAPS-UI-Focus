@@ -1,54 +1,50 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import java.util.concurrent.TimeUnit;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalScheduleStop
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalScheduleStop;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class StopTempBasalTask extends TaskBase {
-    private final TempBasalScheduleStop TEMP_BASAL_SCHEDULE_STOP;
+class StopTempBasalTask @Inject constructor() : TaskBase(TaskFunc.STOP_TEMP_BASAL) {
 
-    @Inject
-    public StopTempBasalTask() {
-        super(TaskFunc.STOP_TEMP_BASAL);
+    private val TEMP_BASAL_SCHEDULE_STOP: TempBasalScheduleStop = TempBasalScheduleStop()
 
-        TEMP_BASAL_SCHEDULE_STOP = new TempBasalScheduleStop();
+    fun stop(): Single<PatchBooleanResponse> {
+        return isReady().concatMapSingle<PatchBooleanResponse>(Function { stopJob() }).firstOrError()
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "StopTempBasalTask error") })
     }
 
-    public Single<PatchBooleanResponse> stop() {
-        return isReady().concatMapSingle(v -> stopJob()).firstOrError()
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "StopTempBasalTask error"));
-    }
-
-    public Single<PatchBooleanResponse> stopJob() {
+    fun stopJob(): Single<PatchBooleanResponse> {
         return TEMP_BASAL_SCHEDULE_STOP.stop()
-                .doOnSuccess(this::checkResponse)
-                .doOnSuccess(v -> onTempBasalCanceled());
+            .doOnSuccess(Consumer { response: PatchBooleanResponse -> this.checkResponse(response) })
+            .doOnSuccess(Consumer { onTempBasalCanceled() })
     }
 
-    private void onTempBasalCanceled() {
-        enqueue(TaskFunc.UPDATE_CONNECTION);
+    private fun onTempBasalCanceled() {
+        enqueue(TaskFunc.UPDATE_CONNECTION)
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized
+    override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = stop()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 
-    @Override
-    protected void preCondition() throws Exception {
+    @Throws(Exception::class) override fun preCondition() {
         //checkPatchActivated();
-        checkPatchConnected();
+        checkPatchConnected()
     }
 }

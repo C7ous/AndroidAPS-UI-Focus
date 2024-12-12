@@ -1,6 +1,6 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-public enum TaskFunc {
+enum class TaskFunc {
     START_BOND,
     GET_PATCH_INFO,
     SELF_TEST,

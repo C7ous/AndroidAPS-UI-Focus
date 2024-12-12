@@ -1,49 +1,47 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.alarm.AlarmCode
+import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.StartNeedleCheck
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.UpdateConnection
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.UpdateConnectionResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState.Companion.create
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.alarm.AlarmCode;
-import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.StartNeedleCheck;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.UpdateConnection;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PropertyName")
 @Singleton
-public class NeedleSensingTask extends TaskBase {
-    @Inject IAlarmRegistry alarmRegistry;
+class NeedleSensingTask @Inject constructor(
+    private val alarmRegistry: IAlarmRegistry
+) : TaskBase(TaskFunc.NEEDLE_SENSING) {
 
-    StartNeedleCheck START_NEEDLE_CHECK;
-    UpdateConnection UPDATE_CONNECTION;
+    var START_NEEDLE_CHECK: StartNeedleCheck = StartNeedleCheck()
+    var UPDATE_CONNECTION: UpdateConnection = UpdateConnection()
 
-    @Inject
-    public NeedleSensingTask() {
-        super(TaskFunc.NEEDLE_SENSING);
-        START_NEEDLE_CHECK = new StartNeedleCheck();
-        UPDATE_CONNECTION = new UpdateConnection();
-    }
-
-    public Single<Boolean> start() {
-
+    fun start(): Single<Boolean> {
         return isReady()
-                .concatMapSingle(v -> START_NEEDLE_CHECK.start())
-                .doOnNext(this::checkResponse)
-                .concatMapSingle(v -> UPDATE_CONNECTION.get())
-                .doOnNext(this::checkResponse)
-                .map(updateConnectionResponse -> PatchState.Companion.create(updateConnectionResponse.getPatchState(), System.currentTimeMillis()))
-                .doOnNext(this::onResponse)
-                .map(patchState -> !patchState.isNeedNeedleSensing())
-                .firstOrError()
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "NeedleSensingTask error"));
+            .concatMapSingle<PatchBooleanResponse>(Function { START_NEEDLE_CHECK.start() })
+            .doOnNext(Consumer { response: PatchBooleanResponse -> this.checkResponse(response) })
+            .concatMapSingle<UpdateConnectionResponse>(Function { UPDATE_CONNECTION.get() })
+            .doOnNext(Consumer { response: UpdateConnectionResponse -> this.checkResponse(response) })
+            .map<PatchState>(Function { updateConnectionResponse: UpdateConnectionResponse -> create(updateConnectionResponse.getPatchState(), System.currentTimeMillis()) })
+            .doOnNext(Consumer { v: PatchState -> this.onResponse(v) })
+            .map<Boolean>(Function { patchState: PatchState -> !patchState.isNeedNeedleSensing })
+            .firstOrError()
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "NeedleSensingTask error") })
     }
 
-    private void onResponse(PatchState v) {
-        if (v.isNeedNeedleSensing()) {
-            alarmRegistry.add(AlarmCode.A016, 0, false).subscribe();
+    private fun onResponse(v: PatchState) {
+        if (v.isNeedNeedleSensing) {
+            alarmRegistry.add(AlarmCode.A016, 0, false).subscribe()
         } else {
-            alarmRegistry.remove(AlarmCode.A016).subscribe();
+            alarmRegistry.remove(AlarmCode.A016).subscribe()
         }
     }
 }

@@ -1,46 +1,40 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import java.util.concurrent.TimeUnit;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetErrorCodes
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.AeCodeResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import app.aaps.core.interfaces.rx.bus.RxBus;
-import info.nightscout.androidaps.plugins.pump.eopatch.alarm.IAlarmRegistry;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetErrorCodes;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.AeCodeResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class FetchAlarmTask extends TaskBase {
-    @Inject RxBus rxBus;
-    @Inject IAlarmRegistry alarmRegistry;
+class FetchAlarmTask @Inject constructor(
+    private val alarmRegistry: IAlarmRegistry
+) : TaskBase(TaskFunc.FETCH_ALARM) {
 
-    private final GetErrorCodes ALARM_ALERT_ERROR_CODE_GET;
+    private val ALARM_ALERT_ERROR_CODE_GET: GetErrorCodes = GetErrorCodes()
 
-    @Inject
-    public FetchAlarmTask() {
-        super(TaskFunc.FETCH_ALARM);
-        ALARM_ALERT_ERROR_CODE_GET = new GetErrorCodes();
-    }
-
-    public Single<AeCodeResponse> getPatchAlarm() {
+    fun getPatchAlarm(): Single<AeCodeResponse> {
         return isReady()
-                .concatMapSingle(v -> ALARM_ALERT_ERROR_CODE_GET.get())
-                .doOnNext(this::checkResponse)
-                .firstOrError()
-                .doOnSuccess(aeCodeResponse -> alarmRegistry.add(aeCodeResponse.getAlarmCodes()))
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "FetchAlarmTask error"));
+            .concatMapSingle<AeCodeResponse>(Function { ALARM_ALERT_ERROR_CODE_GET.get() })
+            .doOnNext(Consumer { response: AeCodeResponse -> this.checkResponse(response) })
+            .firstOrError()
+            .doOnSuccess(Consumer { aeCodeResponse: AeCodeResponse -> alarmRegistry.add(aeCodeResponse.alarmCodes) })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "FetchAlarmTask error") })
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = getPatchAlarm()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 }

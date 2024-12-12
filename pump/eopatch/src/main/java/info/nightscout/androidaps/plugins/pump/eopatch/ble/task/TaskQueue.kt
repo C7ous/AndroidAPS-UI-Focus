@@ -1,97 +1,93 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import androidx.annotation.NonNull;
-
-import java.util.LinkedList;
-import java.util.Queue;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.AAPSLogger;
-import app.aaps.core.interfaces.logging.LTag;
-import app.aaps.core.interfaces.rx.AapsSchedulers;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.subjects.BehaviorSubject;
+import app.aaps.core.interfaces.logging.AAPSLogger
+import app.aaps.core.interfaces.logging.LTag
+import app.aaps.core.interfaces.rx.AapsSchedulers
+import info.nightscout.androidaps.plugins.pump.eopatch.ble.task.TaskQueue.PatchTask
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.functions.Action
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import io.reactivex.rxjava3.functions.Predicate
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import java.util.LinkedList
+import java.util.Queue
+import java.util.concurrent.Callable
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
-public class TaskQueue {
-    @Inject AAPSLogger aapsLogger;
-    @Inject AapsSchedulers aapsSchedulers;
+class TaskQueue @Inject constructor(
+    private val aapsLogger: AAPSLogger,
+    private val aapsSchedulers: AapsSchedulers
+) {
 
-    @NonNull Queue<PatchTask> queue = new LinkedList<>();
+    private var queue: Queue<PatchTask> = LinkedList<PatchTask>()
 
-    private int sequence = 0;
-    private final BehaviorSubject<PatchTask> ticketSubject = BehaviorSubject.create();
-    private final BehaviorSubject<Integer> sizeSubject = BehaviorSubject.createDefault(0);
+    private var sequence = 0
+    private val ticketSubject = BehaviorSubject.create<PatchTask>()
+    private val sizeSubject = BehaviorSubject.createDefault<Int>(0)
 
-    @Inject
-    public TaskQueue() {
+    fun observeQueue(): Observable<Int> {
+        return sizeSubject.distinctUntilChanged()
     }
 
-    protected Observable<Integer> observeQueue() {
-        return sizeSubject.distinctUntilChanged();
+    @Synchronized fun isReady(function: TaskFunc): Observable<TaskFunc> {
+        return Observable.fromCallable<Int>(Callable { publishTicket(function) })
+            .concatMap<PatchTask>(Function { v: Int ->
+                ticketSubject
+                    .takeUntil(Predicate { it: PatchTask -> it.number > v })
+                    .filter(Predicate { it: PatchTask -> it.number == v })
+            })
+            .doOnNext(Consumer { v: PatchTask -> aapsLogger.debug(LTag.PUMPCOMM, String.format("Task #:%s started     func:%s", v.number, v.func.name)) })
+            .observeOn(aapsSchedulers.io)
+            .map<TaskFunc>(Function { it: PatchTask -> it.func })
+            .doFinally(Action { this.done() })
     }
 
-    protected synchronized Observable<TaskFunc> isReady(final TaskFunc function) {
-        return Observable.fromCallable(() -> publishTicket(function))
-                .concatMap(v -> ticketSubject
-                        .takeUntil(it -> it.number > v)
-                        .filter(it -> it.number == v))
-                .doOnNext(v -> aapsLogger.debug(LTag.PUMPCOMM, String.format("Task #:%s started     func:%s", v.number, v.func.name())))
-                .observeOn(aapsSchedulers.getIo())
-                .map(it -> it.func)
-                .doFinally(this::done);
-    }
-
-    protected synchronized Observable<TaskFunc> isReady2(final TaskFunc function) {
+    @Synchronized fun isReady2(function: TaskFunc): Observable<TaskFunc> {
         return observeQueue()
-                .filter(size -> size == 0).concatMap(v -> isReady(function));
+            .filter(Predicate { size: Int -> size == 0 }).concatMap<TaskFunc>(Function { isReady(function) })
     }
 
-    private synchronized int publishTicket(final TaskFunc function) {
-        int turn = sequence++;
-        aapsLogger.debug(LTag.PUMPCOMM, String.format("publishTicket() Task #:%s is assigned func:%s", turn, function.name()));
+    @Synchronized private fun publishTicket(function: TaskFunc): Int {
+        val turn = sequence++
+        aapsLogger.debug(LTag.PUMPCOMM, String.format("publishTicket() Task #:%s is assigned func:%s", turn, function.name))
 
-        PatchTask task = new PatchTask(turn, function);
-        addQueue(task);
-        return turn;
+        val task = PatchTask(turn, function)
+        addQueue(task)
+        return turn
     }
 
-    private synchronized void addQueue(PatchTask task) {
-        queue.add(task);
-        int size = queue.size();
-        sizeSubject.onNext(size);
+    @Synchronized private fun addQueue(task: PatchTask) {
+        queue.add(task)
+        val size = queue.size
+        sizeSubject.onNext(size)
 
         if (size == 1) {
-            ticketSubject.onNext(task);
+            ticketSubject.onNext(task)
         }
     }
 
-    private synchronized void done() {
-        if (!queue.isEmpty()) {
-            PatchTask done = queue.remove();
-            aapsLogger.debug(LTag.PUMPCOMM, String.format("done() Task #:%s completed   func:%s  task remaining:%s",
-                    done.number, done.func.name(), queue.size()));
+    @Synchronized private fun done() {
+        if (queue.isNotEmpty()) {
+            val done = queue.remove()
+            aapsLogger.debug(
+                LTag.PUMPCOMM, String.format(
+                    "done() Task #:%s completed   func:%s  task remaining:%s",
+                    done.number, done.func.name, queue.size
+                )
+            )
         }
 
-        int size = queue.size();
-        sizeSubject.onNext(size);
+        val size = queue.size
+        sizeSubject.onNext(size)
 
-        PatchTask next = queue.peek();
+        val next = queue.peek()
         if (next != null) {
-            ticketSubject.onNext(next);
+            ticketSubject.onNext(next)
         }
     }
 
-    static class PatchTask {
-
-        int number;
-        TaskFunc func;
-
-        PatchTask(int number, TaskFunc func) {
-            this.number = number;
-            this.func = func;
-        }
-    }
+    internal class PatchTask(var number: Int, var func: TaskFunc)
 }

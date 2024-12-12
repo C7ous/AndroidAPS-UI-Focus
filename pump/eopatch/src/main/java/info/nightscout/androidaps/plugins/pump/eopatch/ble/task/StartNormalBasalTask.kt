@@ -1,53 +1,49 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import app.aaps.core.interfaces.logging.LTag
+import app.aaps.core.interfaces.rx.AapsSchedulers
+import info.nightscout.androidaps.plugins.pump.eopatch.ble.PatchStateManager
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalScheduleSetBig
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BasalScheduleSetResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.NormalBasal
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import app.aaps.core.interfaces.logging.LTag;
-import app.aaps.core.interfaces.rx.AapsSchedulers;
-import info.nightscout.androidaps.plugins.pump.eopatch.ble.PatchStateManager;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalScheduleSetBig;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BasalScheduleSetResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.NormalBasal;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class StartNormalBasalTask extends TaskBase {
-    private final BasalScheduleSetBig BASAL_SCHEDULE_SET_BIG;
+class StartNormalBasalTask @Inject constructor(
+    val patchStateManager: PatchStateManager,
+    val aapsSchedulers: AapsSchedulers,
+) : TaskBase(TaskFunc.START_NORMAL_BASAL) {
 
-    @Inject PatchStateManager patchStateManager;
-    @Inject AapsSchedulers aapsSchedulers;
+    private val BASAL_SCHEDULE_SET_BIG: BasalScheduleSetBig = BasalScheduleSetBig()
 
-    @Inject
-    public StartNormalBasalTask() {
-        super(TaskFunc.START_NORMAL_BASAL);
-        BASAL_SCHEDULE_SET_BIG = new BasalScheduleSetBig();
+    fun start(basal: NormalBasal): Single<BasalScheduleSetResponse> {
+        return isReady().concatMapSingle<BasalScheduleSetResponse>(Function { startJob(basal) }).firstOrError()
     }
 
-    public Single<BasalScheduleSetResponse> start(NormalBasal basal) {
-        return isReady().concatMapSingle(v -> startJob(basal)).firstOrError();
+    fun startJob(basal: NormalBasal): Single<BasalScheduleSetResponse> {
+        return BASAL_SCHEDULE_SET_BIG.set(basal.doseUnitPerSegmentArray)
+            .doOnSuccess(Consumer { response: BasalScheduleSetResponse -> this.checkResponse(response) })
+            .observeOn(aapsSchedulers.io)
+            .doOnSuccess(Consumer { v: BasalScheduleSetResponse -> onStartNormalBasalResponse(v, basal) })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "StartNormalBasalTask error") })
     }
 
-    public Single<BasalScheduleSetResponse> startJob(NormalBasal basal) {
-        return BASAL_SCHEDULE_SET_BIG.set(basal.getDoseUnitPerSegmentArray())
-                .doOnSuccess(this::checkResponse)
-                .observeOn(aapsSchedulers.getIo())
-                .doOnSuccess(v -> onStartNormalBasalResponse(v, basal))
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "StartNormalBasalTask error"));
+    private fun onStartNormalBasalResponse(response: BasalScheduleSetResponse, basal: NormalBasal) {
+        val timeStamp = response.getTimestamp()
+        patchStateManager.onBasalStarted(basal, timeStamp + 1000)
+
+        normalBasalManager.normalBasal = basal
+        pm.flushNormalBasalManager()
+        enqueue(TaskFunc.UPDATE_CONNECTION)
     }
 
-    private void onStartNormalBasalResponse(BasalScheduleSetResponse response, NormalBasal basal) {
-
-        long timeStamp = response.getTimestamp();
-        patchStateManager.onBasalStarted(basal, timeStamp + 1000);
-
-        pm.getNormalBasalManager().setNormalBasal(basal);
-        pm.flushNormalBasalManager();
-        enqueue(TaskFunc.UPDATE_CONNECTION);
-    }
-
-    @Override
-    protected void preCondition() throws Exception {
-        checkPatchConnected();
+    @Throws(Exception::class) override fun preCondition() {
+        checkPatchConnected()
     }
 }

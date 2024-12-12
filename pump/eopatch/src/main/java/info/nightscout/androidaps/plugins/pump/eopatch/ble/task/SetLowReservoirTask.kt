@@ -1,54 +1,44 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import java.util.concurrent.TimeUnit;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.SetLowReservoirLevelAndExpireAlert
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.ble.IPreferenceManager;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.SetLowReservoirLevelAndExpireAlert;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class SetLowReservoirTask extends TaskBase {
-    @Inject IPreferenceManager pm;
+class SetLowReservoirTask @Inject constructor() : TaskBase(TaskFunc.LOW_RESERVOIR) {
 
-    private final SetLowReservoirLevelAndExpireAlert SET_LOW_RESERVOIR_N_EXPIRE_ALERT;
+    private val SET_LOW_RESERVOIR_N_EXPIRE_ALERT: SetLowReservoirLevelAndExpireAlert = SetLowReservoirLevelAndExpireAlert()
 
-    @Inject
-    public SetLowReservoirTask() {
-        super(TaskFunc.LOW_RESERVOIR);
-        SET_LOW_RESERVOIR_N_EXPIRE_ALERT = new SetLowReservoirLevelAndExpireAlert();
-    }
-
-    public Single<PatchBooleanResponse> set(int doseUnit, int hours) {
+    fun set(doseUnit: Int, hours: Int): Single<PatchBooleanResponse> {
         return isReady()
-                .concatMapSingle(v -> SET_LOW_RESERVOIR_N_EXPIRE_ALERT.set(
-                        doseUnit,
-                        hours))
-                .doOnNext(this::checkResponse)
-                .firstOrError()
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "SetLowReservoirTask error"));
+            .concatMapSingle<PatchBooleanResponse>(Function { SET_LOW_RESERVOIR_N_EXPIRE_ALERT.set(doseUnit, hours) })
+            .doOnNext(Consumer { response: PatchBooleanResponse -> this.checkResponse(response) })
+            .firstOrError()
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "SetLowReservoirTask error") })
     }
 
-    public synchronized void enqueue() {
+    @Synchronized override fun enqueue() {
+        val alertTime = patchConfig.patchExpireAlertTime
+        val alertSetting = patchConfig.lowReservoirAlertAmount
 
-        int alertTime = pm.getPatchConfig().getPatchExpireAlertTime();
-        int alertSetting = pm.getPatchConfig().getLowReservoirAlertAmount();
-
-        boolean ready = (disposable == null || disposable.isDisposed());
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = set(alertSetting, alertTime)
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 
-    @Override
-    protected void preCondition() throws Exception {
-        checkPatchConnected();
+    @Throws(Exception::class) override fun preCondition() {
+        checkPatchConnected()
     }
 }

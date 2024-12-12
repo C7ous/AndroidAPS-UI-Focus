@@ -1,61 +1,55 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import androidx.annotation.NonNull;
+import app.aaps.core.interfaces.logging.LTag
+import app.aaps.core.interfaces.rx.AapsSchedulers
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BolusStop
+import info.nightscout.androidaps.plugins.pump.eopatch.core.define.IPatchConstant
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusStopResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import app.aaps.core.interfaces.rx.AapsSchedulers;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BolusStop;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.define.IPatchConstant;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BolusStopResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class StopNowBolusTask extends BolusTask {
-    @NonNull private final BolusStop BOLUS_STOP;
+class StopNowBolusTask @Inject constructor(
+    private val aapsSchedulers: AapsSchedulers
+) : BolusTask(TaskFunc.STOP_NOW_BOLUS) {
 
-    @Inject AapsSchedulers aapsSchedulers;
+    private val BOLUS_STOP: BolusStop = BolusStop()
 
-    @Inject
-    public StopNowBolusTask() {
-        super(TaskFunc.STOP_NOW_BOLUS);
-        BOLUS_STOP = new BolusStop();
-    }
-
-    public Single<BolusStopResponse> stop() {
+    fun stop(): Single<BolusStopResponse> {
         return isReady()
-                .observeOn(aapsSchedulers.getMain())
-                .concatMapSingle(v -> stopJob()).firstOrError()
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "StopNowBolusTask error"));
+            .observeOn(aapsSchedulers.main)
+            .concatMapSingle<BolusStopResponse>(Function { stopJob() }).firstOrError()
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "StopNowBolusTask error") })
     }
 
-    public Single<BolusStopResponse> stopJob() {
-        return BOLUS_STOP.stop(IPatchConstant.NOW_BOLUS_ID)
-                .doOnSuccess(this::checkResponse)
-                .doOnSuccess(this::onNowBolusStopped);
+    fun stopJob(): Single<BolusStopResponse> {
+        return BOLUS_STOP.stop(IPatchConstant.NOW_BOLUS_ID.toInt())
+            .doOnSuccess(Consumer { response: BolusStopResponse -> this.checkResponse(response) })
+            .doOnSuccess(Consumer { response: BolusStopResponse -> this.onNowBolusStopped(response) })
     }
 
-    private void onNowBolusStopped(BolusStopResponse response) {
-        updateNowBolusStopped(response.getInjectedBolusAmount());
-        enqueue(TaskFunc.UPDATE_CONNECTION);
+    private fun onNowBolusStopped(response: BolusStopResponse) {
+        updateNowBolusStopped(response.injectedBolusAmount)
+        enqueue(TaskFunc.UPDATE_CONNECTION)
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = stop()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 
-    @Override
-    protected void preCondition() throws Exception {
-        checkPatchConnected();
+    @Throws(Exception::class) override fun preCondition() {
+        checkPatchConnected()
     }
 }

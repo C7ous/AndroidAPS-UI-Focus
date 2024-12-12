@@ -1,50 +1,44 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import androidx.annotation.NonNull;
+import app.aaps.core.interfaces.logging.LTag
+import app.aaps.core.interfaces.rx.AapsSchedulers
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalScheduleStart
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.TempBasalScheduleSetResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.TempBasal
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.TempBasalManager
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import app.aaps.core.interfaces.rx.AapsSchedulers;
-import info.nightscout.androidaps.plugins.pump.eopatch.ble.IPreferenceManager;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalScheduleStart;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.TempBasalScheduleSetResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.TempBasal;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class StartTempBasalTask extends TaskBase {
-    @Inject IPreferenceManager pm;
-    @Inject AapsSchedulers aapsSchedulers;
+class StartTempBasalTask @Inject constructor(
+    private val tempBasalManager: TempBasalManager,
+    private val aapsSchedulers: AapsSchedulers
+) : TaskBase(TaskFunc.START_TEMP_BASAL) {
 
-    private final TempBasalScheduleStart TEMP_BASAL_SCHEDULE_START;
+    private val TEMP_BASAL_SCHEDULE_START: TempBasalScheduleStart = TempBasalScheduleStart()
 
-    @Inject
-    public StartTempBasalTask() {
-        super(TaskFunc.START_TEMP_BASAL);
-
-        TEMP_BASAL_SCHEDULE_START = new TempBasalScheduleStart();
-    }
-
-    public Single<TempBasalScheduleSetResponse> start(@NonNull TempBasal tempBasal) {
+    fun start(tempBasal: TempBasal): Single<TempBasalScheduleSetResponse> {
         return isReady()
-                .concatMapSingle(v -> TEMP_BASAL_SCHEDULE_START.start(tempBasal.getDurationMinutes(), tempBasal.getDoseUnitPerHour(), tempBasal.getPercent()))
-                .doOnNext(this::checkResponse)
-                .firstOrError()
-                .observeOn(aapsSchedulers.getIo())
-                .doOnSuccess(v -> onTempBasalStarted(tempBasal))
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "StartTempBasalTask error"));
+            .concatMapSingle<TempBasalScheduleSetResponse>(Function { TEMP_BASAL_SCHEDULE_START.start(tempBasal.durationMinutes, tempBasal.doseUnitPerHour, tempBasal.percent) })
+            .doOnNext(Consumer { response: TempBasalScheduleSetResponse -> this.checkResponse(response) })
+            .firstOrError()
+            .observeOn(aapsSchedulers.io)
+            .doOnSuccess(Consumer { onTempBasalStarted(tempBasal) })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "StartTempBasalTask error") })
     }
 
-    private void onTempBasalStarted(TempBasal tempBasal) {
-        pm.getTempBasalManager().updateBasalRunning(tempBasal);
-        pm.flushTempBasalManager();
-        enqueue(TaskFunc.UPDATE_CONNECTION);
+    private fun onTempBasalStarted(tempBasal: TempBasal) {
+        tempBasalManager.updateBasalRunning(tempBasal)
+        pm.flushTempBasalManager()
+        enqueue(TaskFunc.UPDATE_CONNECTION)
     }
 
-    @Override
-    protected void preCondition() throws Exception {
-        checkPatchConnected();
+    @Throws(Exception::class) override fun preCondition() {
+        checkPatchConnected()
     }
 }

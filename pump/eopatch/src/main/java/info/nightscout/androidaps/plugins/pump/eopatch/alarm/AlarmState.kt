@@ -1,6 +1,6 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.alarm;
+package info.nightscout.androidaps.plugins.pump.eopatch.alarm
 
-public enum AlarmState {
+enum class AlarmState {
     REGISTER,
     FIRED,
     HANDLE

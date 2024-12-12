@@ -1,45 +1,37 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import java.util.concurrent.TimeUnit;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.InfoReminderSet
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.ble.IPreferenceManager;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.InfoReminderSet;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("PrivatePropertyName", "SpellCheckingInspection")
 @Singleton
-public class InfoReminderTask extends TaskBase {
-    @Inject IPreferenceManager pm;
+class InfoReminderTask @Inject constructor() : TaskBase(TaskFunc.INFO_REMINDER) {
 
-    private final InfoReminderSet INFO_REMINDER_SET;
-
-    @Inject
-    public InfoReminderTask() {
-        super(TaskFunc.INFO_REMINDER);
-        INFO_REMINDER_SET = new InfoReminderSet();
-    }
+    private val INFO_REMINDER_SET: InfoReminderSet = InfoReminderSet()
 
     /* alert delay 사용안함 */
-    public Single<PatchBooleanResponse> set(boolean infoReminder) {
+    fun set(infoReminder: Boolean): Single<PatchBooleanResponse> {
         return isReady()
-                .concatMapSingle(v -> INFO_REMINDER_SET.set(infoReminder))
-                .doOnNext(this::checkResponse)
-                .firstOrError()
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "InfoReminderTask error"));
+            .concatMapSingle<PatchBooleanResponse>(Function { INFO_REMINDER_SET.set(infoReminder) })
+            .doOnNext(Consumer { response: PatchBooleanResponse -> this.checkResponse(response) })
+            .firstOrError()
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "InfoReminderTask error") })
     }
 
-    public synchronized void enqueue() {
-
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
-            disposable = set(pm.getPatchConfig().getInfoReminder())
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+            disposable = set(patchConfig.infoReminder)
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 }

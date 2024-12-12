@@ -1,74 +1,67 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetGlobalTime
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.SetGlobalTime
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.GlobalTimeResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.lang.Exception
+import java.util.TimeZone
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.math.abs
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.GetGlobalTime;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.SetGlobalTime;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.GlobalTimeResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("unused", "PrivatePropertyName")
 @Singleton
-public class SetGlobalTimeTask extends TaskBase {
-    private final SetGlobalTime SET_GLOBAL_TIME;
-    private final GetGlobalTime GET_GLOBAL_TIME;
+class SetGlobalTimeTask @Inject constructor() : TaskBase(TaskFunc.SET_GLOBAL_TIME) {
 
-    @Inject
-    public SetGlobalTimeTask() {
-        super(TaskFunc.SET_GLOBAL_TIME);
+    private val SET_GLOBAL_TIME: SetGlobalTime = SetGlobalTime()
+    private val GET_GLOBAL_TIME: GetGlobalTime = GetGlobalTime()
 
-        SET_GLOBAL_TIME = new SetGlobalTime();
-        GET_GLOBAL_TIME = new GetGlobalTime();
-    }
-
-    public Single<PatchBooleanResponse> set() {
+    fun set(): Single<PatchBooleanResponse> {
         return isReady()
-                .concatMapSingle(v -> GET_GLOBAL_TIME.get(false))
-                .doOnNext(this::checkResponse)
-                .doOnNext(this::checkPatchTime)
-                .concatMapSingle(v -> SET_GLOBAL_TIME.set())
-                .doOnNext(this::checkResponse)
-                .firstOrError()
-                .doOnSuccess(v -> onSuccess())
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "SetGlobalTimeTask error"));
+            .concatMapSingle<GlobalTimeResponse>(Function { GET_GLOBAL_TIME.get(false) })
+            .doOnNext(Consumer { response: GlobalTimeResponse -> this.checkResponse(response) })
+            .doOnNext(Consumer { response: GlobalTimeResponse -> this.checkPatchTime(response) })
+            .concatMapSingle<PatchBooleanResponse>(Function { SET_GLOBAL_TIME.set() })
+            .doOnNext(Consumer { response: PatchBooleanResponse -> this.checkResponse(response) })
+            .firstOrError()
+            .doOnSuccess(Consumer { onSuccess() })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "SetGlobalTimeTask error") })
     }
 
-    private void checkPatchTime(GlobalTimeResponse response) throws Exception {
+    @Throws(Exception::class) private fun checkPatchTime(response: GlobalTimeResponse) {
+        val newMilli = System.currentTimeMillis()
+        val oldMilli = response.globalTimeInMilli
+        val oldOffset = response.timeZoneOffset.toLong()
+        val offset = TimeZone.getDefault().getOffset(newMilli)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(offset.toLong()).toInt()
+        val newOffset = minutes / 15
 
-        long newMilli = System.currentTimeMillis();
-        long oldMilli = response.getGlobalTimeInMilli();
-        long oldOffset = response.getTimeZoneOffset();
-        int offset = TimeZone.getDefault().getOffset(newMilli);
-        int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(offset);
-        int newOffset = minutes / 15;
+        val diff: Long = abs(oldMilli - newMilli)
 
-        long diff = Math.abs(oldMilli - newMilli);
-
-        if (diff > 60000 || oldOffset != newOffset) {
-            aapsLogger.debug(LTag.PUMPCOMM, String.format("checkPatchTime %s %s %s", diff, oldOffset, newOffset));
-            return;
+        if (diff > 60000 || oldOffset != newOffset.toLong()) {
+            aapsLogger.debug(LTag.PUMPCOMM, String.format("checkPatchTime %s %s %s", diff, oldOffset, newOffset))
+            return
         }
 
-        throw new Exception("No time set required");
+        throw Exception("No time set required")
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = set()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe(v -> {
-                    }, e -> {
-                    }); // Exception 을 사용하기에...
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe(Consumer { }, Consumer { }) // Exception 을 사용하기에...
         }
     }
 
-    private void onSuccess() {
+    private fun onSuccess() {
     }
 }

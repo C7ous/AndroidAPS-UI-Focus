@@ -1,140 +1,122 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
-import static info.nightscout.androidaps.plugins.pump.eopatch.core.define.IPatchConstant.BASAL_HISTORY_SIZE_BIG;
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalHistoryGetExBig
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalHistoryIndexGet
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalHistoryGetExBig
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BasalHistoryIndexResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BasalHistoryResponse
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.BiFunction
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import androidx.annotation.NonNull;
-
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import info.nightscout.androidaps.plugins.pump.eopatch.ble.IPreferenceManager;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalHistoryGetExBig;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.BasalHistoryIndexGet;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.TempBasalHistoryGetExBig;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BasalHistoryIndexResponse;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.response.BasalHistoryResponse;
-import io.reactivex.rxjava3.core.Single;
-
+@Suppress("unused", "PrivatePropertyName")
 @Singleton
-public class SyncBasalHistoryTask extends TaskBase {
-    @Inject IPreferenceManager pm;
+class SyncBasalHistoryTask @Inject constructor() : TaskBase(TaskFunc.SYNC_BASAL_HISTORY) {
 
-    private final BasalHistoryIndexGet BASAL_HISTORY_INDEX_GET;
-    @NonNull private final BasalHistoryGetExBig BASAL_HISTORY_GET_EX_BIG;
-    private final TempBasalHistoryGetExBig TEMP_BASAL_HISTORY_GET_EX_BIG;
+    private val BASAL_HISTORY_INDEX_GET: BasalHistoryIndexGet = BasalHistoryIndexGet()
+    private val BASAL_HISTORY_GET_EX_BIG: BasalHistoryGetExBig = BasalHistoryGetExBig()
+    private val TEMP_BASAL_HISTORY_GET_EX_BIG: TempBasalHistoryGetExBig = TempBasalHistoryGetExBig()
 
-    @Inject
-    public SyncBasalHistoryTask() {
-        super(TaskFunc.SYNC_BASAL_HISTORY);
-
-        BASAL_HISTORY_INDEX_GET = new BasalHistoryIndexGet();
-        BASAL_HISTORY_GET_EX_BIG = new BasalHistoryGetExBig();
-        TEMP_BASAL_HISTORY_GET_EX_BIG = new TempBasalHistoryGetExBig();
+    fun sync(end: Int): Single<Int> {
+        return Single.just<Int>(1) // 베이젤 싱크 사용 안함
     }
 
-    public Single<Integer> sync(int end) {
-        return Single.just(1);  // 베이젤 싱크 사용 안함
+    fun sync(): Single<Int> {
+        return Single.just<Int>(1) // 베이젤 싱크 사용 안함
     }
 
-    public Single<Integer> sync() {
-        return Single.just(1);  // 베이젤 싱크 사용 안함
-    }
-
-    private Single<Integer> getLastIndex() {
+    private fun getLastIndex(): Single<Int> {
         return BASAL_HISTORY_INDEX_GET.get()
-                .doOnSuccess(this::checkResponse)
-                .map(BasalHistoryIndexResponse::getLastFinishedIndex);
+            .doOnSuccess(Consumer { response: BasalHistoryIndexResponse -> this.checkResponse(response) })
+            .map<Int>(Function { obj: BasalHistoryIndexResponse -> obj.lastFinishedIndex })
     }
 
-    private Single<Integer> syncBoth(int start, int end) {
-        int count = end - start + 1;
+    private fun syncBoth(start: Int, end: Int): Single<Int> {
+        val count = end - start + 1
 
-        if (count > 0) {
-            return Single.zip(
-                    BASAL_HISTORY_GET_EX_BIG.get(start, count),
-                    TEMP_BASAL_HISTORY_GET_EX_BIG.get(start, count),
-                    (normal, temp) -> onBasalHistoryResponse(normal, temp, start, end));
+        return if (count > 0) {
+            Single.zip<BasalHistoryResponse, BasalHistoryResponse, Int>(
+                BASAL_HISTORY_GET_EX_BIG.get(start, count),
+                TEMP_BASAL_HISTORY_GET_EX_BIG.get(start, count),
+                BiFunction { normal: BasalHistoryResponse, temp: BasalHistoryResponse -> onBasalHistoryResponse(normal, temp, start, end) })
         } else {
-            return Single.just(-1);
+            Single.just<Int>(-1)
         }
     }
 
-    public synchronized void enqueue(int end) {
-
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized fun enqueue(end: Int) {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = sync(end)
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 
-    public synchronized void enqueue() {
-        boolean ready = (disposable == null || disposable.isDisposed());
+    @Synchronized override fun enqueue() {
+        val ready = (disposable == null || disposable?.isDisposed == true)
 
         if (ready) {
             disposable = sync()
-                    .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
-                    .subscribe();
+                .timeout(TASK_ENQUEUE_TIME_OUT, TimeUnit.SECONDS)
+                .subscribe()
         }
     }
 
-    private int onBasalHistoryResponse(BasalHistoryResponse n, BasalHistoryResponse t,
-                                       int startRequested, int end) {
-
-        if (!n.isSuccess() || !t.isSuccess() || n.getSeq() != t.getSeq()) {
-            return -1;
+    private fun onBasalHistoryResponse(n: BasalHistoryResponse, t: BasalHistoryResponse, startRequested: Int, end: Int): Int {
+        if (!n.isSuccess || !t.isSuccess || n.seq != t.seq) {
+            return -1
         }
 
-        int start = n.getSeq();
+        val start = n.seq
 
-        float[] normal = n.getInjectedDoseValues();
-        float[] temp = t.getInjectedDoseValues();
+        val normal = n.injectedDoseValues
+        val temp = t.injectedDoseValues
 
-        int count = Math.min(end - start + 1, BASAL_HISTORY_SIZE_BIG);
-        count = Math.min(count, normal.length);
-        count = Math.min(count, temp.length);
-
-        return updateInjected(normal, temp, start, end);
+        //        int count = Math.min(end - start + 1, BASAL_HISTORY_SIZE_BIG);
+//        count = Math.min(count, normal.length);
+//        count = Math.min(count, temp.length);
+        return updateInjected(normal, temp, start, end)
     }
 
-    public synchronized int updateInjected(float[] normal, float[] temp, int start, int end) {
-        if (pm.getPatchState().isPatchInternalSuspended() && !pm.getPatchConfig().isInBasalPausedTime()) {
-            return -1;
+    @Synchronized fun updateInjected(normal: FloatArray, temp: FloatArray, start: Int, end: Int): Int {
+        if (pm.patchState.isPatchInternalSuspended && !patchConfig.isInBasalPausedTime) {
+            return -1
         }
 
-        int lastUpdatedIndex = -1;
-        int count = end - start + 1;
+        var lastUpdatedIndex = -1
+        var count = end - start + 1
 
-        if (count > normal.length) {
-            count = normal.length;
+        if (count > normal.size) {
+            count = normal.size
         }
 
         if (count > 0) {
-            int lastSyncIndex = pm.getPatchConfig().getLastIndex();
-            for (int i = 0; i < count; i++) {
-                int seq = start + i;
-                if (seq < lastSyncIndex)
-                    continue;
+            val lastSyncIndex = patchConfig.lastIndex
+            for (i in 0 until count) {
+                val seq = start + i
+                if (seq < lastSyncIndex) continue
 
                 if (start <= seq && seq <= end) {
-                    lastUpdatedIndex = seq;
+                    lastUpdatedIndex = seq
                 }
             }
         }
 
-        return lastUpdatedIndex;
+        return lastUpdatedIndex
     }
 
-    private void updatePatchLastIndex(int newIndex) {
-        int lastIndex = pm.getPatchConfig().getLastIndex();
+    private fun updatePatchLastIndex(newIndex: Int) {
+        val lastIndex = patchConfig.lastIndex
 
         if (lastIndex < newIndex) {
-            pm.getPatchConfig().setLastIndex(newIndex);
-            pm.flushPatchConfig();
+            patchConfig.lastIndex = newIndex
+            pm.flushPatchConfig()
         }
     }
 }

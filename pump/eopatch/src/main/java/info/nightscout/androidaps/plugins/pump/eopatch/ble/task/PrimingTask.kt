@@ -1,54 +1,51 @@
-package info.nightscout.androidaps.plugins.pump.eopatch.ble.task;
+package info.nightscout.androidaps.plugins.pump.eopatch.ble.task
 
+import app.aaps.core.interfaces.logging.LTag
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.StartPriming
+import info.nightscout.androidaps.plugins.pump.eopatch.core.api.UpdateConnection
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.PatchBooleanResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.core.response.UpdateConnectionResponse
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState
+import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState.Companion.create
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import io.reactivex.rxjava3.functions.Predicate
+import java.lang.Exception
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import app.aaps.core.interfaces.logging.LTag;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.StartPriming;
-import info.nightscout.androidaps.plugins.pump.eopatch.core.api.UpdateConnection;
-import info.nightscout.androidaps.plugins.pump.eopatch.vo.PatchState;
-import io.reactivex.rxjava3.core.Observable;
-
+@Suppress("PrivatePropertyName")
 @Singleton
-public class PrimingTask extends TaskBase {
-    private final UpdateConnection UPDATE_CONNECTION;
-    private final StartPriming START_PRIMING;
+class PrimingTask @Inject constructor() : TaskBase(TaskFunc.PRIMING) {
 
-    @Inject
-    public PrimingTask() {
-        super(TaskFunc.PRIMING);
+    private val UPDATE_CONNECTION: UpdateConnection = UpdateConnection()
+    private val START_PRIMING: StartPriming = StartPriming()
 
-        UPDATE_CONNECTION = new UpdateConnection();
-        START_PRIMING = new StartPriming();
+    fun start(count: Long): Observable<Long> {
+        return isReady().concatMapSingle<PatchBooleanResponse>(Function { START_PRIMING.start() })
+            .doOnNext(Consumer { response: PatchBooleanResponse -> this.checkResponse(response) })
+            .flatMap<Long>(Function { observePrimingSuccess(count) })
+            .takeUntil(Predicate { value: Long -> (value == count) })
+            .doOnError(Consumer { e: Throwable -> aapsLogger.error(LTag.PUMPCOMM, e.message ?: "PrimingTask error") })
     }
 
-    public Observable<Long> start(long count) {
-        return isReady().concatMapSingle(v -> START_PRIMING.start())
-                .doOnNext(this::checkResponse)
-                .flatMap(v -> observePrimingSuccess(count))
-                .takeUntil(value -> (value == count))
-                .doOnError(e -> aapsLogger.error(LTag.PUMPCOMM, (e.getMessage() != null) ? e.getMessage() : "PrimingTask error"));
-    }
+    private fun observePrimingSuccess(count: Long): Observable<Long> {
+        return Observable.merge<Long>(
+            Observable.interval(1, TimeUnit.SECONDS).take(count + 10)
+                .map<Long>(Function { v: Long -> v * 3 })
+                .doOnNext(Consumer { v: Long ->
+                    if (v >= count) {
+                        throw Exception("Priming failed")
+                    }
+                }),
 
-    private Observable<Long> observePrimingSuccess(long count) {
-
-        return Observable.merge(
-                Observable.interval(1, TimeUnit.SECONDS).take(count + 10)
-                        .map(v -> v * 3)
-                        .doOnNext(v -> {
-                            if (v >= count) {
-                                throw new Exception("Priming failed");
-                            }
-                        }),
-
-                Observable.interval(3, TimeUnit.SECONDS)
-                        .concatMapSingle(v -> UPDATE_CONNECTION.get())
-                        .map(response -> PatchState.Companion.create(response.getPatchState(), System.currentTimeMillis()))
-                        .filter(PatchState::isPrimingSuccess)
-                        .map(result -> count)
-        );
+            Observable.interval(3, TimeUnit.SECONDS)
+                .concatMapSingle<UpdateConnectionResponse>(Function { UPDATE_CONNECTION.get() })
+                .map<PatchState>(Function { response: UpdateConnectionResponse -> create(response.getPatchState(), System.currentTimeMillis()) })
+                .filter(PatchState::isPrimingSuccess)
+                .map<Long>(Function { count })
+        )
     }
 }
