@@ -9,9 +9,6 @@
     tools:context=".ui.DashPodManagementActivity">
 
     <LinearLayout
-        android:layout_marginTop="270dp"
-        android:layout_marginStart="13dp"
-        android:layout_marginEnd="13dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -40,9 +37,7 @@
                 app:layout_constrainedHeight="@+id/Actions_Row_1_horizontal_guideline"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/Actions_Col_1_Row_1_vertical_guideline"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/Actions_Col_1_Row_1_vertical_guideline"
@@ -63,9 +58,7 @@
                 app:layout_constrainedHeight="@+id/Actions_Row_1_horizontal_guideline"
                 app:layout_constraintLeft_toRightOf="@+id/Actions_Col_1_Row_1_vertical_guideline"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -94,9 +87,7 @@
                 app:layout_constrainedHeight="@+id/Actions_Row_2_horizontal_guideline"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/Actions_Col_1_Row_2_vertical_guideline"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <app.aaps.core.ui.elements.SingleClickButton
                 android:id="@+id/button_pod_history"
@@ -110,9 +101,7 @@
                 app:layout_constrainedHeight="@+id/Actions_Row_2_horizontal_guideline"
                 app:layout_constraintLeft_toRightOf="@+id/Actions_Col_1_Row_2_vertical_guideline"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/Actions_Col_1_Row_2_vertical_guideline"

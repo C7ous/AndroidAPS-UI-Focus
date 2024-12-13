@@ -73,9 +73,7 @@
                 app:layout_constrainedHeight="@+id/Actions_Row_1_horizontal_guideline"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/Actions_Col_1_Row_1_vertical_guideline"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/Actions_Col_1_Row_1_vertical_guideline"
@@ -96,9 +94,7 @@
                 app:layout_constrainedHeight="@+id/Actions_Row_1_horizontal_guideline"
                 app:layout_constraintLeft_toRightOf="@+id/Actions_Col_1_Row_1_vertical_guideline"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -127,9 +123,7 @@
                 app:layout_constrainedHeight="@+id/Actions_Row_2_horizontal_guideline"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/Actions_Col_1_Row_2_vertical_guideline"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/Actions_Col_1_Row_2_vertical_guideline"
@@ -151,9 +145,7 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toRightOf="@+id/Actions_Col_1_Row_2_vertical_guideline"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -190,9 +182,7 @@
                 app:layout_constrainedHeight="@+id/Tools_Row_1_horizontal_guideline"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/Tools_Col_1_vertical_guideline"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/Tools_Col_1_vertical_guideline"
@@ -213,9 +203,7 @@
                 app:layout_constrainedHeight="@+id/Tools_Row_1_horizontal_guideline"
                 app:layout_constraintLeft_toRightOf="@+id/Tools_Col_1_vertical_guideline"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -243,9 +231,7 @@
                 app:layout_constrainedHeight="@+id/Tools_Row_2_horizontal_guideline"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/Tools_Col_1_Row_2_vertical_guideline"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/Tools_Col_1_Row_2_vertical_guideline"
@@ -266,9 +252,7 @@
                 app:layout_constrainedHeight="@+id/Tools_Row_2_horizontal_guideline"
                 app:layout_constraintLeft_toRightOf="@+id/Tools_Col_1_Row_2_vertical_guideline"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/colorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
