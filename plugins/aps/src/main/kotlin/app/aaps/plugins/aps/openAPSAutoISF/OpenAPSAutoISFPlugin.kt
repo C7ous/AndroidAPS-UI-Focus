@@ -218,6 +218,7 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
         preferenceFragment.findPreference<SwitchPreference>(BooleanKey.ApsUseSmbAfterCarbs.key)?.isVisible = !smbAlwaysEnabled || !advancedFiltering
     }
 
+    private val autoIsfCache = LongSparseArray<Double>()
     private var autoIsfCache = LongSparseArray<Double>()
 
     @Synchronized
@@ -246,6 +247,7 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
             // can default to 0, e.g. for the first 2-3 loops in a virgin setup
             aapsLogger.debug("calculateVariableIsf CALC ${dateUtil.dateAndTimeAndSecondsString(timestamp)} $sensitivity")
             autoIsfCache.put(key, sensitivity)
+            if (autoIsfCache.size() > 1000) autoIsfCache.clear()
         }
         // this return is mandatory, otherwise it messed up the AutoISF algo.
         return Pair("OFF", null)
