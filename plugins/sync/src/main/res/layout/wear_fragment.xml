@@ -45,8 +45,6 @@
                 app:columnCount="2">
 
                 <com.google.android.material.button.MaterialButton
-                    app:cornerRadius="8dp"
-                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/resend"
                     style="@style/GrayButton"
                     android:layout_width="0dp"
@@ -62,8 +60,6 @@
                     app:layout_row="0" />
 
                 <com.google.android.material.button.MaterialButton
-                    app:cornerRadius="8dp"
-                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/open_settings"
                     style="@style/GrayButton"
                     android:layout_width="0dp"
