@@ -78,7 +78,6 @@
                     android:id="@+id/user_action"
                     style="@style/Widget.App.CheckBox"
                     android:layout_width="match_parent"
-                    android:layout_width="122dp"
                     android:layout_height="wrap_content"
                     android:text="@string/user_action" />
 
