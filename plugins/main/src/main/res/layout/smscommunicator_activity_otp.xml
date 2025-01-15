@@ -95,6 +95,8 @@
             android:text="@string/smscommunicator_otp_reset_warning" />
 
         <app.aaps.core.ui.elements.SingleClickButton
+            app:cornerRadius="8dp"
+            app:strokeColor="@color/colorPrimary"
             android:id="@+id/otp_reset"
             style="@style/GrayButton"
             android:layout_width="fill_parent"
