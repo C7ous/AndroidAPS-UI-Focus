@@ -386,15 +386,13 @@ class InsightConnectionService : DaggerService(), ConnectionEstablisher.Callback
         bluetoothAdapter?.let { bluetoothAdapter ->
             if (bluetoothDevice == null) bluetoothDevice = bluetoothAdapter.getRemoteDevice(pairingDataStorage.macAddress)
             setState(InsightState.CONNECTING)
-            bluetoothDevice?.let { bluetoothDevice ->
-                connectionEstablisher = ConnectionEstablisher(this, !pairingDataStorage.paired, bluetoothAdapter, bluetoothDevice, bluetoothSocket).also {
-                    it.start()
-                }
+            connectionEstablisher = ConnectionEstablisher(this, !pairingDataStorage.paired, bluetoothAdapter, bluetoothDevice, bluetoothSocket).also {
+                it.start()
             }
         }
     }
 
-    @Synchronized override fun onSocketCreated(bluetoothSocket: BluetoothSocket?) {
+    @Synchronized override fun onSocketCreated(bluetoothSocket: BluetoothSocket) {
         this.bluetoothSocket = bluetoothSocket
     }
 
@@ -701,7 +699,7 @@ class InsightConnectionService : DaggerService(), ConnectionEstablisher.Callback
         appLayerMessage?.let { sendSatlMessage(wrap(it)) }
     }
 
-    @Synchronized override fun onConnectionFail(e: Exception?, duration: Long) {
+    @Synchronized override fun onConnectionFail(e: Exception, duration: Long) {
         handleException(ConnectionFailedException(duration))
     }
 

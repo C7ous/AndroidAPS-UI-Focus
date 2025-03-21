@@ -77,6 +77,8 @@
     <string name="deltalabel_u">BZ-Unterschied [%1$s]</string>
     <string name="currentlocation">Aktueller Standort</string>
     <string name="location">Standort</string>
+    <string name="latitude_short">Breitengrad:</string>
+    <string name="longitude_short">Längengrad:</string>
     <string name="glucose_u">Glukosewert [%1$s]:</string>
     <string name="target_u">Zielwert [%1$s]:</string>
     <string name="lastboluslabel">Letzter Bolus vor</string>

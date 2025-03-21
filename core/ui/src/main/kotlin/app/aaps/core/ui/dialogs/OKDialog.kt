@@ -18,7 +18,7 @@ object OKDialog {
     }
 
     @SuppressLint("InflateParams")
-    fun show(context: Context, title: String, message: String, runOnDismiss: Boolean = false, runnable: Runnable? = null) {
+    fun show(context: Context, title: String, message: String, runnable: Runnable? = null) {
         var okClicked = false
         var notEmptyTitle = title
         if (notEmptyTitle.isEmpty()) notEmptyTitle = context.getString(R.string.message)
@@ -35,17 +35,12 @@ object OKDialog {
                     runOnUiThread(runnable)
                 }
             }
-            .setOnDismissListener {
-                if (runOnDismiss) {
-                    runOnUiThread(runnable)
-                }
-            }
             .show()
             .setCanceledOnTouchOutside(false)
     }
 
     @SuppressLint("InflateParams")
-    fun show(context: Context, title: String, message: Spanned, runOnDismiss: Boolean = false, runnable: Runnable? = null) {
+    fun show(context: Context, title: String, message: Spanned, runnable: Runnable? = null) {
         var okClicked = false
         var notEmptyTitle = title
         if (notEmptyTitle.isEmpty()) notEmptyTitle = context.getString(R.string.message)
@@ -62,17 +57,12 @@ object OKDialog {
                     runOnUiThread(runnable)
                 }
             }
-            .setOnDismissListener {
-                if (runOnDismiss) {
-                    runOnUiThread(runnable)
-                }
-            }
             .show()
             .setCanceledOnTouchOutside(false)
     }
 
     @SuppressLint("InflateParams")
-    fun show(activity: FragmentActivity, title: String, message: Spanned, runOnDismiss: Boolean = false, runnable: Runnable? = null) {
+    fun show(activity: FragmentActivity, title: String, message: Spanned, runnable: Runnable? = null) {
         var okClicked = false
         var notEmptyTitle = title
         if (notEmptyTitle.isEmpty()) notEmptyTitle = activity.getString(R.string.message)
@@ -87,11 +77,6 @@ object OKDialog {
                     dialog.dismiss()
                     SystemClock.sleep(100)
                     runnable?.let { activity.runOnUiThread(it) }
-                }
-            }
-            .setOnDismissListener {
-                if (runOnDismiss) {
-                    runOnUiThread(runnable)
                 }
             }
             .show()
