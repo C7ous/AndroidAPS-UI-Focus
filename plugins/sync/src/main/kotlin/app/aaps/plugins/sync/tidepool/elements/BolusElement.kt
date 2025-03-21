@@ -15,8 +15,5 @@ class BolusElement(bolus: BS, dateUtil: DateUtil) : BaseElement(bolus.timestamp,
         type = "bolus"
         normal = bolus.amount
         expectedNormal = bolus.amount
-        if (bolus.type == BS.Type.SMB) {
-            subType = "automated"
-        }
     }
 }

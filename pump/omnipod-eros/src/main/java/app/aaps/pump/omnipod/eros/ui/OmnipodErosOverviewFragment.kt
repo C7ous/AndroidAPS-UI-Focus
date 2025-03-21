@@ -602,7 +602,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
             app.aaps.core.ui.UIRunnable {
                 OKDialog.show(
                     it, rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
-                    rh.gs(R.string.omnipod_eros_error_operation_not_possible_no_configuration)
+                    rh.gs(R.string.omnipod_eros_error_operation_not_possible_no_configuration), null
                 )
             }.run()
         }
@@ -615,7 +615,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
     private fun displayOkDialog(title: String, message: String) {
         context?.let {
             app.aaps.core.ui.UIRunnable {
-                OKDialog.show(it, title, message)
+                OKDialog.show(it, title, message, null)
             }.run()
         }
     }

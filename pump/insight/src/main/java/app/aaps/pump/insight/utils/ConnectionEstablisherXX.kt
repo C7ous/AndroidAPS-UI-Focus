@@ -1,16 +1,14 @@
 package app.aaps.pump.insight.utils
 
-import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import androidx.annotation.RequiresPermission
-import app.aaps.core.data.time.T
 import app.aaps.core.utils.extensions.safeEnable
 import java.io.IOException
 import java.util.UUID
 
-class ConnectionEstablisher(
+// Todo I cannot pair with this file (cannot establish connection with pump during pairing process)
+class ConnectionEstablisherXX(
     private val callback: Callback,
     private val forPairing: Boolean,
     private val bluetoothAdapter: BluetoothAdapter,
@@ -18,20 +16,19 @@ class ConnectionEstablisher(
     private var socket: BluetoothSocket?
 ) : Thread() {
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun run() {
         try {
             if (!bluetoothAdapter.isEnabled) {
                 bluetoothAdapter.safeEnable()
                 sleep(2000)
             }
-        } catch (_: InterruptedException) {
+        } catch (ignored: InterruptedException) {
             return
         }
         if (forPairing && bluetoothDevice.bondState != BluetoothDevice.BOND_NONE) {
             try {
                 val removeBond = bluetoothDevice.javaClass.getMethod("removeBond")
-                removeBond.invoke(bluetoothDevice)
+                removeBond.invoke(bluetoothDevice, null)
             } catch (e: ReflectiveOperationException) {
                 if (!isInterrupted) callback.onConnectionFail(e, 0)
                 return
@@ -48,7 +45,7 @@ class ConnectionEstablisher(
         }
         val connectionStart = System.currentTimeMillis()
         try {
-            socket?.connect()
+            socket?.connect()                                               // TODO Wrong management of null ?
             if (!isInterrupted) callback.onConnectionSucceed()
         } catch (e: IOException) {
             if (!isInterrupted) callback.onConnectionFail(e, System.currentTimeMillis() - connectionStart)
@@ -58,8 +55,8 @@ class ConnectionEstablisher(
     fun close(closeSocket: Boolean) {
         try {
             interrupt()
-            socket?.let { if (closeSocket && it.isConnected) it.close() }
-        } catch (_: IOException) {
+            socket?.let { if (closeSocket && it.isConnected) it.close() }   // TODO Wrong management of null ?
+        } catch (ignored: IOException) {
         }
     }
 

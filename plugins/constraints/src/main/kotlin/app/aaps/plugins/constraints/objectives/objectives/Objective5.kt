@@ -1,9 +1,7 @@
 package app.aaps.plugins.constraints.objectives.objectives
 
-import app.aaps.core.data.aps.ApsMode
 import app.aaps.core.data.time.T
 import app.aaps.core.interfaces.logging.AAPSLogger
-import app.aaps.core.keys.StringKey
 import app.aaps.core.objects.constraints.ConstraintObject
 import app.aaps.plugins.constraints.R
 import app.aaps.plugins.constraints.safety.SafetyPlugin
@@ -23,8 +21,7 @@ class Objective5(injector: HasAndroidInjector) : Objective(injector, "maxiobzero
                 override fun isCompleted(): Boolean {
                     val closedLoopEnabled = ConstraintObject(true, aapsLogger)
                     safetyPlugin.isClosedLoopAllowed(closedLoopEnabled)
-                    val apsMode = ApsMode.fromString(preferences.get(StringKey.LoopApsMode))
-                    return closedLoopEnabled.value() && apsMode == ApsMode.LGS
+                    return closedLoopEnabled.value()
                 }
             }.learned(Learned(R.string.objectives_maxiobzero_learned))
         )

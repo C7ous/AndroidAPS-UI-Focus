@@ -86,7 +86,6 @@ object BiometricCheck {
             .setTitle(activity.getString(title))
             .setDescription(activity.getString(R.string.biometric_title))
             .setNegativeButtonText(activity.getString(R.string.cancel)) // not possible with setDeviceCredentialAllowed
-            .setConfirmationRequired(false)
 //            .setDeviceCredentialAllowed(true) // setDeviceCredentialAllowed creates new activity when PIN is requested, activity.fragmentManager crash afterwards
             .build()
 
