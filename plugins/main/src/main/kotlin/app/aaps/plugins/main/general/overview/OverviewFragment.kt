@@ -203,7 +203,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         if (config.AAPSCLIENT2)
             binding.nsclientCard.setBackgroundColor(Color.argb(80, 0x0F, 0xBB, 0xE0))
 
-        overview.setVersionView(binding.infoLayout.version)
 
         skinProvider.activeSkin().preProcessLandscapeOverviewLayout(binding, landscape, rh.gb(app.aaps.core.ui.R.bool.isTablet), smallHeight)
         binding.nsclientCard.visibility = config.AAPSCLIENT.toVisibility()
