@@ -1,6 +1,7 @@
 package app.aaps.ui.dialogs
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.view.animation.Animation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CompoundButton
@@ -121,6 +123,15 @@ class WizardDialog : DaggerDialogFragment() {
         }
     }
 
+    //Animation for opening and closing
+    override fun onCreateAnimation(transit: Int, enter: Boolean, nextAnim: Int): Animation? {
+        return if (enter) {
+            android.view.animation.AnimationUtils.loadAnimation(context, R.anim.wiz_dialog_funnel_up)
+        } else {
+            android.view.animation.AnimationUtils.loadAnimation(context, R.anim.wiz_dialog_funnel_down)
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -133,6 +144,13 @@ class WizardDialog : DaggerDialogFragment() {
         savedInstanceState.putDouble("carbs_input", binding.carbsInput.value)
         savedInstanceState.putDouble("correction_input", binding.correctionInput.value)
         savedInstanceState.putDouble("carb_time_input", binding.carbTimeInput.value)
+    }
+
+    //Animation for opening and closing
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.window?.setWindowAnimations(R.style.WizDialogFunnelAnimation)
+        return dialog
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -308,7 +326,7 @@ class WizardDialog : DaggerDialogFragment() {
         _binding = null
     }
 
-    private fun onCheckedChanged(buttonView: CompoundButton, @Suppress("unused") state: Boolean) {
+    private fun onCheckedChanged(buttonView: CompoundButton, @Suppress("UNUSED_PARAMETER") state: Boolean) {
         saveCheckedStates()
         binding.ttCheckbox.isEnabled = binding.bgCheckbox.isChecked && persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now()) != null
         binding.ttCheckboxIcon.visibility = binding.ttCheckbox.isEnabled.toVisibility()

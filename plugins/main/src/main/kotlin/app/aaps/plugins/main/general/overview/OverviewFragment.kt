@@ -23,6 +23,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.text.toSpanned
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.aaps.core.data.aps.SMBDefaults
 import app.aaps.core.data.configuration.Constants
 import app.aaps.core.data.model.GlucoseUnit
 import app.aaps.core.data.pump.defs.PumpType
@@ -255,7 +256,38 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         binding.buttonsLayout.quickWizardButton.setOnLongClickListener(this)
         binding.infoLayout.apsMode.setOnClickListener(this)
         binding.infoLayout.apsMode.setOnLongClickListener(this)
+
+// Mod exercise mode toggle icon
+
+        binding.exerciseModeCheckboxIcon.setOnClickListener {
+            // Get current state of exercise mode from SMBDefaults
+            val exerciseMode = SMBDefaults.exercise_mode
+
+            if (exerciseMode) {
+                // If exercise mode is enabled, disable it
+                binding.exerciseModeCheckboxIcon.setImageResource(R.drawable.exerciseinactive)
+                binding.exerciseModeCheckboxIcon.setBackgroundResource(app.aaps.core.ui.R.color.ribbonDefault)
+
+                // Disable exercise mode
+                SMBDefaults.exercise_mode = false
+
+                // Update SharedPreferences to reflect that exercise mode is now disabled
+                sp.putBoolean(app.aaps.core.utils.R.string.key_high_temptarget_raises_sensitivity, false)
+            } else {
+                // If exercise mode is disabled, enable it
+                binding.exerciseModeCheckboxIcon.setImageResource(R.drawable.exercise)
+                binding.exerciseModeCheckboxIcon.setBackgroundResource(app.aaps.core.ui.R.color.ribbonWarning)
+
+                // Enable exercise mode
+                SMBDefaults.exercise_mode = true
+
+                // Update SharedPreferences to reflect that exercise mode is now enabled
+                sp.putBoolean(app.aaps.core.utils.R.string.key_high_temptarget_raises_sensitivity, true)
+            }
+        }
     }
+
+ // End mod
 
     @Synchronized
     override fun onPause() {
@@ -1178,6 +1210,10 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             )
         }
 
+        binding.infoLayout.sensitivity.text =
+            lastAutosensData?.let {
+                String.format(Locale.ENGLISH, "%.0f%%", it.autosensResult.ratio * 100)
+            } ?: ""
         // Show variable sensitivity
         val profile = profileFunction.getProfile()
         val request = loop.lastRun?.request
