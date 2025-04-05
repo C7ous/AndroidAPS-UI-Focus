@@ -270,8 +270,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                 // Disable exercise mode
                 SMBDefaults.exercise_mode = false
 
-                // Update SharedPreferences to reflect that exercise mode is now disabled
-                sp.putBoolean(app.aaps.core.utils.R.string.key_high_temptarget_raises_sensitivity, false)
             } else {
                 // If exercise mode is disabled, enable it
                 binding.exerciseModeCheckboxIcon.setImageResource(R.drawable.exercise)
@@ -280,8 +278,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                 // Enable exercise mode
                 SMBDefaults.exercise_mode = true
 
-                // Update SharedPreferences to reflect that exercise mode is now enabled
-                sp.putBoolean(app.aaps.core.utils.R.string.key_high_temptarget_raises_sensitivity, true)
             }
         }
     }
