@@ -1,5 +1,6 @@
 package app.aaps.ui.dialogs
 
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -7,6 +8,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
 import app.aaps.core.data.model.GlucoseUnit
 import app.aaps.core.data.model.TE
 import app.aaps.core.data.model.TT
@@ -106,11 +108,27 @@ class CarbsDialog : DialogFragmentWithDate() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    //Animation for opening and closing
+    override fun onCreateAnimation(transit: Int, enter: Boolean, nextAnim: Int): Animation? {
+        return if (enter) {
+            android.view.animation.AnimationUtils.loadAnimation(context, R.anim.carbs_dialog_funnel_up)
+        } else {
+            android.view.animation.AnimationUtils.loadAnimation(context, R.anim.carbs_dialog_funnel_down)
+        }
+    }
+
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         savedInstanceState.putDouble("time", binding.time.value)
         savedInstanceState.putDouble("duration", binding.duration.value)
         savedInstanceState.putDouble("carbs", binding.carbs.value)
+    }
+
+    //Animation for opening and closing
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.window?.setWindowAnimations(R.style.CarbsDialogFunnelAnimation)
+        return dialog
     }
 
     override fun onCreateView(
@@ -283,7 +301,6 @@ class CarbsDialog : DialogFragmentWithDate() {
         }
         if (carbsAfterConstraints < 0) {
             if (carbsAfterConstraints < -cob) carbsAfterConstraints = ceil(-cob).toInt()
-            if (timeOffset != 0) carbsAfterConstraints = 0
             actions.add(
                 rh.gs(app.aaps.core.ui.R.string.carbs) + ": " + "<font color='" + rh.gac(
                     context,

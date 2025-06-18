@@ -1,5 +1,6 @@
 package app.aaps.ui.dialogs
 
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.view.animation.Animation
 import androidx.fragment.app.FragmentManager
 import app.aaps.core.data.model.RM
 import app.aaps.core.data.pump.defs.PumpDescription
@@ -80,6 +82,15 @@ class LoopDialog : DaggerDialogFragment() {
 
     val disposable = CompositeDisposable()
 
+    //Animation for opening and closing
+    override fun onCreateAnimation(transit: Int, enter: Boolean, nextAnim: Int): Animation? {
+        return if (enter) {
+            android.view.animation.AnimationUtils.loadAnimation(context, R.anim.loop_dialog_funnel_up)
+        } else {
+            android.view.animation.AnimationUtils.loadAnimation(context, R.anim.loop_dialog_funnel_down)
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(
@@ -91,6 +102,13 @@ class LoopDialog : DaggerDialogFragment() {
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         savedInstanceState.putBoolean("showOkCancel", showOkCancel)
+    }
+
+    //Animation for opening and closing
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.window?.setWindowAnimations(R.style.LoopDialogFunnelAnimation)
+        return dialog
     }
 
     override fun onCreateView(

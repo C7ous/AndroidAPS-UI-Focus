@@ -158,7 +158,7 @@
     <string name="invalid">INVALID</string>
     <string name="login">Login</string>
     <string name="prime_fill">Prime/Fill</string>
-    <string name="overview_insulin_label">Insulin</string>
+    <string name="overview_insulin_label"> </string>
     <string name="stoptemptarget">Stop temp target</string>
     <string name="closedloop">Closed Loop</string>
     <string name="openloop">Open Loop</string>
@@ -438,9 +438,9 @@
     <string name="sensitivity">Sensitivity</string>
     <string name="isf_for_carbs">ISF for Calculator and Carbs Absorption: %1$.1f</string>
     <string name="autosens_long">Autosens Value: %.0f%%</string>
-    <string name="autosens_short">AS: %.0f%%</string>
+    <string name="autosens_short">%.0f%%</string>
     <string name="algorithm_long">Autosens in algorithm: %.0f%%</string>
-    <string name="algorithm_short">Alg: %.0f%%</string>
+    <string name="algorithm_short">%.0f%%</string>
     <string name="a11y_file">file</string>
     <string name="a11y_user">user</string>
 

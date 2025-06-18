@@ -51,6 +51,8 @@
             tools:text="Project Member ID: 5151515" />
 
         <com.google.android.material.button.MaterialButton
+            app:cornerRadius="8dp"
+            app:strokeColor="@color/colorPrimary"
             android:id="@+id/setup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,6 +60,8 @@
             android:text="@string/setup" />
 
         <com.google.android.material.button.MaterialButton
+            app:cornerRadius="8dp"
+            app:strokeColor="@color/colorPrimary"
             android:id="@+id/upload_now"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,6 +69,8 @@
             android:text="@string/upload_now" />
 
         <com.google.android.material.button.MaterialButton
+            app:cornerRadius="8dp"
+            app:strokeColor="@color/colorPrimary"
             android:id="@+id/logout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
