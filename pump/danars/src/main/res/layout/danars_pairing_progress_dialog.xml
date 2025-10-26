@@ -65,8 +65,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="15dp"
-        android:text="@string/ok"
-        app:cornerRadius="8dp"
-        app:strokeColor="@color/colorPrimary" />
+        android:text="@string/ok" />
 
 </LinearLayout>

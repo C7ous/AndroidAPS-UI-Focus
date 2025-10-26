@@ -1,6 +1,5 @@
 package app.aaps.ui.dialogs
 
-import android.app.Dialog
 import android.os.Bundle
 import android.text.Spanned
 import android.view.LayoutInflater
@@ -8,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.view.animation.Animation
 import app.aaps.core.interfaces.configuration.Config
 import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.plugin.ActivePlugin
@@ -28,7 +26,6 @@ import app.aaps.core.objects.profile.ProfileSealed
 import app.aaps.core.ui.extensions.toVisibility
 import app.aaps.core.utils.HtmlHelper
 import app.aaps.ui.databinding.DialogProfileviewerBinding
-import dagger.android.HasAndroidInjector
 import dagger.android.support.DaggerDialogFragment
 import org.json.JSONObject
 import java.text.DecimalFormat
@@ -36,7 +33,6 @@ import javax.inject.Inject
 
 class ProfileViewerDialog : DaggerDialogFragment() {
 
-    @Inject lateinit var injector: HasAndroidInjector
     @Inject lateinit var rh: ResourceHelper
     @Inject lateinit var dateUtil: DateUtil
     @Inject lateinit var profileFunction: ProfileFunction
@@ -60,22 +56,6 @@ class ProfileViewerDialog : DaggerDialogFragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
-    //Animation for opening and closing
-    override fun onCreateAnimation(transit: Int, enter: Boolean, nextAnim: Int): Animation? {
-        return if (enter) {
-            android.view.animation.AnimationUtils.loadAnimation(context, app.aaps.ui.R.anim.profile_viewer_funnel_up)
-        } else {
-            android.view.animation.AnimationUtils.loadAnimation(context, app.aaps.ui.R.anim.profile_viewer_funnel_down)
-        }
-    }
-
-    //Animation for opening and closing
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState)
-        dialog.window?.setWindowAnimations(app.aaps.ui.R.style.ProfileViewerFunnelAnimation)
-        return dialog
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
