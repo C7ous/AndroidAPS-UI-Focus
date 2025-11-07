@@ -779,8 +779,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             // rebuild needed
             secondaryGraphs.clear()
             secondaryGraphsLabel.clear()
-            binding.graphsLayout.secondaryGraphs.removeAllViews()
-            (1 until numOfGraphs).forEach { _ ->
+            binding.graphsLayout.iobGraph.removeAllViews()
+            (1 until numOfGraphs).forEach {
                 val relativeLayout = RelativeLayout(context)
                 relativeLayout.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -803,7 +803,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                 relativeLayout.addView(label)
                 secondaryGraphsLabel.add(label)
 
-                binding.graphsLayout.secondaryGraphs.addView(relativeLayout)
+                binding.graphsLayout.iobGraph.addView(relativeLayout)
                 secondaryGraphs.add(graph)
             }
         }

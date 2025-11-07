@@ -21,6 +21,8 @@
 
             <ImageView
                 android:id="@+id/loop_icon"
+                android:layout_marginTop="3dp"
+                android:layout_marginStart="3dp"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:importantForAccessibility="no"
@@ -88,16 +90,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/overview_loop_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/loop"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-
             <LinearLayout
                 android:id="@+id/overview_loop_buttons"
                 android:layout_width="wrap_content"
@@ -106,56 +98,89 @@
                 android:orientation="horizontal">
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_closeloop"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0dp"
                     android:layout_height="fill_parent"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_closed"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
+                    android:drawableTop="@drawable/ic_loop_closed"
                     android:text="@string/closedloop"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:visibility="gone" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_lgsloop"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0dp"
                     android:layout_height="fill_parent"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_lgs"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
-                    android:text="@string/lowglucosesuspend" />
+                    android:drawableTop="@drawable/ic_loop_lgs"
+                    android:text="@string/lowglucosesuspend"
+                    android:visibility="gone" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_openloop"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0dp"
                     android:layout_height="fill_parent"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_open"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
-                    android:text="@string/openloop" />
+                    android:drawableTop="@drawable/ic_loop_open"
+                    android:text="@string/openloop"
+                    android:visibility="gone" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
+                    android:id="@+id/overview_enable"
+                    style="@style/ButtonSmallFontStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="0.5"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:drawableTop="@drawable/ic_loop_resume"
+                    android:text="@string/openloop"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
+
+                <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_disable"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0dp"
                     android:layout_height="fill_parent"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_disabled"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
+                    android:drawableTop="@drawable/ic_loop_disabled"
                     android:text="@string/disableloop" />
 
             </LinearLayout>
@@ -178,26 +203,29 @@
 
             <TextView
                 android:id="@+id/overview_suspend_header"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:text="@string/suspendloop"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <app.aaps.core.ui.elements.SingleClickButton
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/overview_resume"
                 style="@style/ButtonSmallFontStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center"
-                android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                android:layout_marginEnd="-2dp"
                 android:layout_weight="0.5"
                 android:drawableTop="@drawable/ic_loop_resume"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
-                android:text="@string/resumeloop" />
+                android:text="@string/resumeloop"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/overview_suspend_buttons"
@@ -207,51 +235,62 @@
                 android:orientation="horizontal">
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_suspend_1h"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_paused"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_paused"
                     android:text="@string/duration1h" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_suspend_2h"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_paused"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
-                    android:text="@string/duration2h" />
+                    android:drawableTop="@drawable/ic_loop_paused"
+                    android:text="@string/duration2h"
+                     />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_suspend_3h"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_paused"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_paused"
                     android:text="@string/duration3h" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_suspend_10h"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_paused"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_paused"
                     android:text="@string/duration10h" />
 
             </LinearLayout>
@@ -274,26 +313,29 @@
 
             <TextView
                 android:id="@+id/overview_pump_header"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:text="@string/disconnectpump"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <app.aaps.core.ui.elements.SingleClickButton
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"
                 android:id="@+id/overview_reconnect"
                 style="@style/ButtonSmallFontStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center"
-                android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                android:layout_marginEnd="-2dp"
                 android:layout_weight="0.5"
                 android:drawableTop="@drawable/ic_loop_reconnect"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
-                android:text="@string/reconnect" />
+                android:text="@string/reconnect"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/overview_disconnect_buttons"
@@ -303,63 +345,77 @@
                 android:orientation="horizontal">
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_disconnect_15m"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:text="@string/duration15m" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_disconnect_30m"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:text="@string/duration30m" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_disconnect_1h"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:text="@string/duration1h" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_disconnect_2h"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:text="@string/duration2h" />
 
                 <app.aaps.core.ui.elements.SingleClickButton
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/colorPrimary"
                     android:id="@+id/overview_disconnect_3h"
                     style="@style/ButtonSmallFontStyle"
                     android:layout_width="0px"
                     android:layout_height="fill_parent"
-                    android:layout_marginEnd="@dimen/gray_material_button_margin_horizontal"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="0.5"
-                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
+                    android:drawableTop="@drawable/ic_loop_disconnected"
                     android:text="@string/duration3h" />
 
             </LinearLayout>
@@ -375,15 +431,18 @@
             android:background="?android:attr/dividerHorizontal" />
 
         <com.google.android.material.button.MaterialButton
+            android:layout_gravity="end"
             android:id="@+id/cancel"
             style="@style/OkCancelButton.Text"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="@string/cancel"
             android:padding="10dp"
-            android:textAlignment="textEnd" />
+            android:text="@string/cancel"
+            android:textAlignment="textEnd"
+            app:cornerRadius="8dp"
+            app:strokeColor="@color/colorPrimary" />
 
     </LinearLayout>
 
