@@ -73,7 +73,6 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
     private lateinit var actionHelper: ActionModeHelper<QuickWizardEntry>
     private val itemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback())
     private lateinit var binding: ActivityQuickwizardListBinding
-    private var menuProvider: MenuProvider? = null
 
     override fun onStartDrag(viewHolder: RecyclerView.ViewHolder) {
         itemTouchHelper.startDrag(viewHolder)
@@ -207,15 +206,14 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
             val editQuickWizardDialog = EditQuickWizardDialog()
             editQuickWizardDialog.show(manager, "EditQuickWizardDialog")
         }
-        menuProvider = object : MenuProvider {
+        addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(app.aaps.core.objects.R.menu.menu_actions, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
                 actionHelper.onOptionsItemSelected(menuItem)
-        }
-        addMenuProvider(menuProvider!!)
+        })
     }
 
     override fun onResume() {
@@ -233,13 +231,6 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
         disposable.clear()
         actionHelper.finish()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.recyclerview.adapter = null
-        binding.addButton.setOnClickListener(null)
-        menuProvider?.let { removeMenuProvider(it) }
     }
 
     private fun removeSelected(selectedItems: SparseArray<QuickWizardEntry>) {

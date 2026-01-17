@@ -6,13 +6,13 @@ import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 
 class TriggerProfilePercentTest : TriggerTestBase() {
 
     @BeforeEach fun mock() {
-        whenever(profileFunction.getProfile()).thenReturn(validProfile)
+        `when`(profileFunction.getProfile()).thenReturn(validProfile)
     }
 
     @Test fun shouldRunTest() {

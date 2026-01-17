@@ -10,8 +10,7 @@ import app.aaps.shared.tests.TestBaseWithProfile
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 open class
 ActionsTestBase : TestBaseWithProfile() {
@@ -71,13 +70,13 @@ ActionsTestBase : TestBaseWithProfile() {
 
     @BeforeEach
     fun mock() {
-        whenever(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
-        whenever(profileFunction.getProfile()).thenReturn(validProfile)
-        whenever(activePlugin.activeProfileSource).thenReturn(profilePlugin)
-        whenever(profilePlugin.profile).thenReturn(getValidProfileStore())
-        whenever(loop.handleRunningModeChange(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyInt(), anyOrNull())).thenReturn(true)
+        `when`(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
+        `when`(profileFunction.getProfile()).thenReturn(validProfile)
+        `when`(activePlugin.activeProfileSource).thenReturn(profilePlugin)
+        `when`(profilePlugin.profile).thenReturn(getValidProfileStore())
+        `when`(loop.handleRunningModeChange(anyObject(), anyObject(), anyObject(), anyObject(), anyInt(), anyObject())).thenReturn(true)
 
-        whenever(rh.gs(app.aaps.core.ui.R.string.ok)).thenReturn("OK")
-        whenever(rh.gs(app.aaps.core.ui.R.string.error)).thenReturn("Error")
+        `when`(rh.gs(app.aaps.core.ui.R.string.ok)).thenReturn("OK")
+        `when`(rh.gs(app.aaps.core.ui.R.string.error)).thenReturn("Error")
     }
 }

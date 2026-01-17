@@ -6,15 +6,14 @@ import app.aaps.pump.omnipod.eros.manager.AapsOmnipodErosManager
 import com.google.common.truth.Truth.assertThat
 import org.joda.time.Duration
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 import kotlin.test.assertFailsWith
 
 internal class AapsOmnipodErosManagerTest {
 
     @Test fun validProfile() {
-        val profile: Profile = mock()
-        whenever(profile.getBasalValues()).thenReturn(
+        val profile = Mockito.mock(Profile::class.java)
+        Mockito.`when`(profile.getBasalValues()).thenReturn(
             arrayOf(
                 ProfileValue(0, 0.5),
                 ProfileValue(18000, 1.0),
@@ -36,14 +35,14 @@ internal class AapsOmnipodErosManagerTest {
     }
 
     @Test fun invalidProfileZeroEntries() {
-        val profile: Profile = mock()
-        whenever(profile.getBasalValues()).thenReturn(emptyArray())
+        val profile = Mockito.mock(Profile::class.java)
+        Mockito.`when`(profile.getBasalValues()).thenReturn(emptyArray())
         assertFailsWith<IllegalArgumentException> { AapsOmnipodErosManager.mapProfileToBasalSchedule(profile) }
     }
 
     @Test fun invalidProfileNonZeroOffset() {
-        val profile: Profile = mock()
-        whenever(profile.getBasalValues()).thenReturn(
+        val profile = Mockito.mock(Profile::class.java)
+        Mockito.`when`(profile.getBasalValues()).thenReturn(
             arrayOf(
                 ProfileValue(1800, 0.5)
             )
@@ -52,8 +51,8 @@ internal class AapsOmnipodErosManagerTest {
     }
 
     @Test fun invalidProfileMoreThan24Hours() {
-        val profile: Profile = mock()
-        whenever(profile.getBasalValues()).thenReturn(
+        val profile = Mockito.mock(Profile::class.java)
+        Mockito.`when`(profile.getBasalValues()).thenReturn(
             arrayOf(
                 ProfileValue(0, 0.5),
                 ProfileValue(86400, 0.5)
@@ -63,8 +62,8 @@ internal class AapsOmnipodErosManagerTest {
     }
 
     @Test fun invalidProfileNegativeOffset() {
-        val profile: Profile = mock()
-        whenever(profile.getBasalValues()).thenReturn(
+        val profile = Mockito.mock(Profile::class.java)
+        Mockito.`when`(profile.getBasalValues()).thenReturn(
             arrayOf(
                 ProfileValue(-1, 0.5)
             )
@@ -73,8 +72,8 @@ internal class AapsOmnipodErosManagerTest {
     }
 
     @Test fun roundsToSupportedPrecision() {
-        val profile: Profile = mock()
-        whenever(profile.getBasalValues()).thenReturn(
+        val profile = Mockito.mock(Profile::class.java)
+        Mockito.`when`(profile.getBasalValues()).thenReturn(
             arrayOf(
                 ProfileValue(0, 0.04)
             )

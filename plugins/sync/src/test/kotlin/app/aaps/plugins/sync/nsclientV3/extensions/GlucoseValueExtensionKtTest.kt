@@ -22,7 +22,7 @@ internal class GlucoseValueExtensionKtTest : TestBaseWithProfile() {
             value = 99.0,
             trendArrow = TrendArrow.DOUBLE_UP,
             noise = 1.0,
-            sourceSensor = SourceSensor.DEXCOM_G6_NATIVE,
+            sourceSensor = SourceSensor.DEXCOM_G4_WIXEL,
             ids = IDs(
                 nightscoutId = "nightscoutId"
             )

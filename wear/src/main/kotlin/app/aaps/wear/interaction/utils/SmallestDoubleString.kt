@@ -11,7 +11,7 @@ import java.util.regex.Pattern
  *
  * Created by dlvoy on 2019-11-12
  */
-class SmallestDoubleString(inputString: String, withUnits: Units = Units.SKIP) {
+class SmallestDoubleString @JvmOverloads constructor(inputString: String, withUnits: Units = Units.SKIP) {
 
     private var sign: String
     private var decimal: String
@@ -51,7 +51,7 @@ class SmallestDoubleString(inputString: String, withUnits: Units = Units.SKIP) {
             val remainingForFraction = maxSize - currentLen() + fractional.length
             var formatCandidate = "#"
             if (remainingForFraction >= 1) {
-                formatCandidate = "#." + "#######".take(remainingForFraction)
+                formatCandidate = "#." + "#######".substring(0, remainingForFraction)
             }
             val df = DecimalFormat(formatCandidate)
             df.roundingMode = RoundingMode.HALF_UP

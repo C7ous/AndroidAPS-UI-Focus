@@ -5,16 +5,16 @@ import android.content.SharedPreferences
 import app.aaps.core.interfaces.sharedPreferences.SP
 import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.wear.interaction.utils.Constants
+import app.aaps.wear.interaction.utils.Persistence
+import app.aaps.wear.interaction.utils.WearUtil
 import app.aaps.wear.testing.mocks.SharedPreferencesMock
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -31,14 +31,17 @@ open class WearTestBase {
     @Mock lateinit var dateUtil: DateUtil
     @OptIn(ExperimentalTime::class)
     @Mock lateinit var clock: Clock
+    lateinit var wearUtil: WearUtil
+
+    lateinit var persistence: Persistence
 
     private val mockedSharedPrefs: HashMap<String, SharedPreferences> = HashMap()
 
     @OptIn(ExperimentalTime::class)
     @BeforeEach
     fun setup() {
-        MockitoAnnotations.openMocks(this)
-        doAnswer { invocation ->
+        wearUtil = WearUtil(context, aapsLogger, clock)
+        Mockito.doAnswer { invocation ->
             val key = invocation.getArgument<String>(0)
             if (mockedSharedPrefs.containsKey(key)) {
                 return@doAnswer mockedSharedPrefs[key]
@@ -47,8 +50,10 @@ open class WearTestBase {
                 mockedSharedPrefs[key] = newPrefs
                 return@doAnswer newPrefs
             }
-        }.whenever(context).getSharedPreferences(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())
+        }.`when`(context).getSharedPreferences(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())
         setClockNow()
+
+        persistence = Mockito.spy(Persistence(aapsLogger, dateUtil, sp))
     }
 
     fun progressClock(byMilliseconds: Long) {
@@ -58,7 +63,7 @@ open class WearTestBase {
 
     @OptIn(ExperimentalTime::class)
     private fun setClockNow() {
-        whenever(clock.now()).thenReturn(Instant.fromEpochMilliseconds(clockNow))
+        Mockito.`when`(clock.now()).thenReturn(Instant.fromEpochMilliseconds(clockNow))
     }
 
     companion object {

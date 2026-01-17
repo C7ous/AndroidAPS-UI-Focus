@@ -68,12 +68,6 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
         disposable.clear()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.prefRecyclerview.adapter = null
-        binding.viewRecyclerview.adapter = null
-    }
-
     override fun onResume() {
         super.onResume()
         disposable += rxBus

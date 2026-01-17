@@ -25,9 +25,6 @@ class EquilPairAirFragment : EquilPairFragmentBase() {
 
     @Inject lateinit var profileFunction: ProfileFunction
 
-    private var buttonAir: Button? = null
-    private var buttonFinish: Button? = null
-
     override fun getLayoutId(): Int = R.layout.equil_pair_air_fragment
 
     override fun getNextPageActionId(): Int = R.id.action_startEquilActivationFragment_to_startEquilPairConfirmFragment
@@ -36,19 +33,17 @@ class EquilPairAirFragment : EquilPairFragmentBase() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        buttonAir = view.findViewById(R.id.button_air)
-        buttonFinish = view.findViewById(R.id.button_finish)
         view.findViewById<Button>(R.id.button_next)?.let { buttonNext ->
             buttonNext.alpha = 0.3f
             buttonNext.isClickable = false
         }
-        buttonAir?.setOnClickListener {
+        view.findViewById<Button>(R.id.button_air).setOnClickListener {
             context?.let {
                 showLoading()
                 setStep()
             }
         }
-        buttonFinish?.setOnClickListener {
+        view.findViewById<Button>(R.id.button_finish).setOnClickListener {
             context?.let {
                 showLoading()
                 if ((activity as? EquilPairActivity)?.pair == true) setAlarmMode()
@@ -56,14 +51,6 @@ class EquilPairAirFragment : EquilPairFragmentBase() {
                 else setTime()
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        buttonAir?.setOnClickListener(null)
-        buttonFinish?.setOnClickListener(null)
-        buttonAir = null
-        buttonFinish = null
     }
 
     private fun setStep() {

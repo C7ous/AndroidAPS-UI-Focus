@@ -1,6 +1,5 @@
 package info.nightscout.comboctl.base
 
-import app.aaps.shared.tests.TestBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -36,8 +35,7 @@ val frameDataWithEscapedSpecialBytes = byteArrayListOfInts(
     0xCC
 )
 
-class ComboFrameTest : TestBase() {
-
+class ComboFrameTest {
     @Test
     fun produceEscapedFrameData() {
         // Frame the payload and check that the framing is done correctly.

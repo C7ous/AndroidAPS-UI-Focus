@@ -24,7 +24,6 @@ class SingleFragmentActivity : DaggerAppCompatActivityWithResult() {
     @Inject lateinit var overview: Overview
 
     private var plugin: PluginBase? = null
-    private var singleFragmentMenuProvider: MenuProvider? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +42,7 @@ class SingleFragmentActivity : DaggerAppCompatActivityWithResult() {
 
         overview.setVersionView(findViewById<TextView>(R.id.version))
         // Add menu items without overriding methods in the Activity
-        singleFragmentMenuProvider = object : MenuProvider {
+        addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 if ((plugin?.preferencesId ?: return) == PluginDescription.PREFERENCE_NONE) return
                 if ((preferences.simpleMode && plugin?.pluginDescription?.preferencesVisibleInSimpleMode != true)) return
@@ -69,12 +68,6 @@ class SingleFragmentActivity : DaggerAppCompatActivityWithResult() {
 
                     else                        -> false
                 }
-        }
-        singleFragmentMenuProvider?.let { addMenuProvider(it) }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        singleFragmentMenuProvider?.let { removeMenuProvider(it) }
+        })
     }
 }

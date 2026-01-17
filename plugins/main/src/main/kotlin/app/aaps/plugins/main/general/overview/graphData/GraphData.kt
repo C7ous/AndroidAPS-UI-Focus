@@ -265,8 +265,8 @@ class GraphData @Inject constructor(
     private fun addSeries(s: Series<*>) = series.add(s)
 
     fun performUpdate() {
-        // clear old data - use removeAllSeries() to properly detach GraphView from series
-        graph.removeAllSeries()
+        // clear old data
+        graph.series.clear()
 
         // add pre calculated series
         for (s in series) {

@@ -9,7 +9,7 @@ import app.aaps.implementation.pump.isOlderThan
 import app.aaps.shared.tests.TestBaseWithProfile
 import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 class TherapyEventExtensionKtTest : TestBaseWithProfile() {
 
@@ -32,9 +32,9 @@ class TherapyEventExtensionKtTest : TestBaseWithProfile() {
                 pumpSerial = "b"
             )
         )
-        whenever(dateUtil.now()).thenReturn(now + T.mins(30).msecs())
+        Mockito.`when`(dateUtil.now()).thenReturn(now + T.mins(30).msecs())
         assertThat(therapyEvent.isOlderThan(1, dateUtil)).isFalse()
-        whenever(dateUtil.now()).thenReturn(now + T.hours(2).msecs())
+        Mockito.`when`(dateUtil.now()).thenReturn(now + T.hours(2).msecs())
         assertThat(therapyEvent.isOlderThan(1, dateUtil)).isTrue()
     }
 }

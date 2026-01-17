@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 
 class ActionSendSMSTest : ActionsTestBase() {
@@ -17,8 +17,8 @@ class ActionSendSMSTest : ActionsTestBase() {
     @BeforeEach
     fun setup() {
 
-        whenever(rh.gs(R.string.sendsmsactionlabel)).thenReturn("Send SMS: %s")
-        whenever(rh.gs(R.string.sendsmsactiondescription)).thenReturn("Send SMS to all numbers")
+        `when`(rh.gs(R.string.sendsmsactionlabel)).thenReturn("Send SMS: %s")
+        `when`(rh.gs(R.string.sendsmsactiondescription)).thenReturn("Send SMS to all numbers")
 
         sut = ActionSendSMS(injector)
     }
@@ -36,7 +36,7 @@ class ActionSendSMSTest : ActionsTestBase() {
     }
 
     @Test fun doActionTest() {
-        whenever(smsCommunicator.sendNotificationToAllNumbers(anyString())).thenReturn(true)
+        `when`(smsCommunicator.sendNotificationToAllNumbers(anyString())).thenReturn(true)
         sut.text = InputString("Asd")
         sut.doAction(object : Callback() {
             override fun run() {

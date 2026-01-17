@@ -4,12 +4,12 @@ import app.aaps.core.data.pump.defs.PumpDescription
 import app.aaps.pump.danar.comm.MsgSettingBasal
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 class MsgSettingBasalTest : DanaRTestBase() {
 
     @Test fun runTest() {
-        whenever(danaRPlugin.pumpDescription).thenReturn(PumpDescription())
+        `when`(danaRPlugin.pumpDescription).thenReturn(PumpDescription())
         val packet = MsgSettingBasal(injector)
 
         // test message decoding

@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import androidx.annotation.VisibleForTesting
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.receivers.ReceiverStatusStore
 import app.aaps.core.interfaces.rx.bus.RxBus
@@ -24,8 +23,7 @@ class ChargingStateReceiver : DaggerBroadcastReceiver() {
         //aapsLogger.debug(LTag.CORE, receiverStatusStore.lastChargingEvent?.toString() ?: "Unknown charging state")
     }
 
-    @VisibleForTesting
-    fun grabChargingState(context: Context): EventChargingState {
+    private fun grabChargingState(context: Context): EventChargingState {
         val batteryStatus = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 
         // Level

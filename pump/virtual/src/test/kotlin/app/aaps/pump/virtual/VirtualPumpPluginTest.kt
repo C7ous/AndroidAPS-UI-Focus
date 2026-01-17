@@ -11,7 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 class VirtualPumpPluginTest : TestBaseWithProfile() {
 
@@ -32,16 +32,16 @@ class VirtualPumpPluginTest : TestBaseWithProfile() {
 
     @Test
     fun refreshConfiguration() {
-        whenever(preferences.get(StringKey.VirtualPumpType)).thenReturn("Accu-Chek Combo")
+        `when`(preferences.get(StringKey.VirtualPumpType)).thenReturn("Accu-Chek Combo")
         virtualPumpPlugin.refreshConfiguration()
         assertThat(virtualPumpPlugin.pumpType).isEqualTo(PumpType.ACCU_CHEK_COMBO)
     }
 
     @Test
     fun refreshConfigurationTwice() {
-        whenever(preferences.get(StringKey.VirtualPumpType)).thenReturn("Accu-Chek Combo")
+        `when`(preferences.get(StringKey.VirtualPumpType)).thenReturn("Accu-Chek Combo")
         virtualPumpPlugin.refreshConfiguration()
-        whenever(preferences.get(StringKey.VirtualPumpType)).thenReturn("Accu-Chek Combo")
+        `when`(preferences.get(StringKey.VirtualPumpType)).thenReturn("Accu-Chek Combo")
         virtualPumpPlugin.refreshConfiguration()
         assertThat(virtualPumpPlugin.pumpType).isEqualTo(PumpType.ACCU_CHEK_COMBO)
     }

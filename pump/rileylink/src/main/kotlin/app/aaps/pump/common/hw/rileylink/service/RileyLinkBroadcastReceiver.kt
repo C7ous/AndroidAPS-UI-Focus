@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
+import android.os.HandlerThread
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
@@ -34,6 +36,7 @@ class RileyLinkBroadcastReceiver : DaggerBroadcastReceiver() {
     @Inject lateinit var initializePumpManagerTaskProvider: Provider<InitializePumpManagerTask>
     @Inject lateinit var discoverGattServicesTaskProvider: Provider<DiscoverGattServicesTask>
 
+    private var handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
     private val broadcastIdentifiers: MutableMap<String, List<String>> = HashMap()
 
     init {
@@ -70,11 +73,11 @@ class RileyLinkBroadcastReceiver : DaggerBroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         val action = intent.action ?: return
-        Thread {
+        handler.post {
             aapsLogger.debug(LTag.PUMPBTCOMM, "Received Broadcast: $action")
             if (!processBluetoothBroadcasts(action) && !processRileyLinkBroadcasts(action, context) && !processTuneUpBroadcasts(action))
                 aapsLogger.error(LTag.PUMPBTCOMM, "Unhandled broadcast: action=$action")
-        }.start()
+        }
     }
 
     fun registerBroadcasts(context: Context) {

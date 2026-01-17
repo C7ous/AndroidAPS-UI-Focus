@@ -28,8 +28,7 @@ class SyncNsTemporaryTargetTransaction(private val temporaryTargets: List<Tempor
                         database.temporaryTargetDao.updateExistingEntry(current)
                         result.invalidated.add(current)
                     }
-                    // Allow update duration to shorter only
-                    if (current.duration != temporaryTarget.duration && temporaryTarget.duration < current.duration) {
+                    if (current.duration != temporaryTarget.duration) {
                         current.duration = temporaryTarget.duration
                         database.temporaryTargetDao.updateExistingEntry(current)
                         result.updatedDuration.add(current)

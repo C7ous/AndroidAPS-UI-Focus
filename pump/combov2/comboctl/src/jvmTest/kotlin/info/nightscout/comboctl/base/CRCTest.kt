@@ -1,11 +1,10 @@
 package info.nightscout.comboctl.base
 
-import app.aaps.shared.tests.TestBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.text.Charsets
 
-class CRCTest : TestBase() {
-
+class CRCTest {
     @Test
     fun verifyChecksum() {
         val inputData = "0123456789abcdef".toByteArray(Charsets.UTF_8).toList()

@@ -304,6 +304,7 @@ class AutotuneFragment : DaggerFragment() {
         binding.tuneLastRun.paintFlags = binding.tuneLastRun.paintFlags or Paint.UNDERLINE_TEXT_FLAG
     }
 
+    @Synchronized
     override fun onResume() {
         super.onResume()
         disposable += rxBus
@@ -316,15 +317,11 @@ class AutotuneFragment : DaggerFragment() {
         updateGui()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    @Synchronized
+    override fun onPause() {
+        super.onPause()
+        disposable.clear()
         handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     @Synchronized

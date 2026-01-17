@@ -18,8 +18,8 @@ import com.google.gson.reflect.TypeToken
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import java.lang.reflect.Type
 
 @Suppress("UNCHECKED_CAST")
@@ -31,7 +31,7 @@ class MedtronicHistoryDataUTest : MedtronicTestBase() {
     @BeforeEach
     fun setUp() {
         medtronicUtil = MedtronicUtil(aapsLogger, rxBus, rileyLinkUtil, medtronicPumpStatus, uiInteraction)
-        whenever(medtronicUtil.medtronicPumpModel).thenReturn(MedtronicDeviceType.Medtronic_723_Revel)
+        `when`(medtronicUtil.medtronicPumpModel).thenReturn(MedtronicDeviceType.Medtronic_723_Revel)
         decoder = MedtronicPumpHistoryDecoder(aapsLogger, medtronicUtil)
     }
 
@@ -116,7 +116,7 @@ class MedtronicHistoryDataUTest : MedtronicTestBase() {
 
         val glucoseMgdl = 175
 
-        whenever(preferences.get(StringKey.GeneralUnits)).thenReturn(GlucoseUnit.MGDL.asText)
+        `when`(preferences.get(StringKey.GeneralUnits)).thenReturn(GlucoseUnit.MGDL.asText)
 
         val bgRecord = PumpHistoryEntry()
         bgRecord.setEntryType(medtronicUtil.medtronicPumpModel, PumpHistoryEntryType.BGReceived)
@@ -143,7 +143,7 @@ class MedtronicHistoryDataUTest : MedtronicTestBase() {
         val glucoseMgdl = 180
         val glucoseMmol = 10.0
 
-        whenever(preferences.get(StringKey.GeneralUnits)).thenReturn(GlucoseUnit.MMOL.asText)
+        `when`(preferences.get(StringKey.GeneralUnits)).thenReturn(GlucoseUnit.MMOL.asText)
 
         val bgRecord = PumpHistoryEntry()
         bgRecord.setEntryType(medtronicUtil.medtronicPumpModel, PumpHistoryEntryType.BGReceived)

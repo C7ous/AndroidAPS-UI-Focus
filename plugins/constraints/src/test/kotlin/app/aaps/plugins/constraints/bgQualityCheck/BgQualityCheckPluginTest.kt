@@ -19,9 +19,9 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.`when`
 
 class BgQualityCheckPluginTest : TestBase() {
 
@@ -40,23 +40,23 @@ class BgQualityCheckPluginTest : TestBase() {
     fun mock() {
         plugin =
             BgQualityCheckPlugin(aapsLogger, rh, rxBus, iobCobCalculator, aapsSchedulers, fabricPrivacy, dateUtil)
-        whenever(iobCobCalculator.ads).thenReturn(autosensDataStore)
-        whenever(rh.gs(anyInt())).thenReturn("")
-        whenever(rh.gs(anyInt(), any(), any())).thenReturn("")
-        whenever(dateUtil.now()).thenReturn(now)
+        `when`(iobCobCalculator.ads).thenReturn(autosensDataStore)
+        `when`(rh.gs(anyInt())).thenReturn("")
+        `when`(rh.gs(anyInt(), any(), any())).thenReturn("")
+        `when`(dateUtil.now()).thenReturn(now)
     }
 
     @Test
     fun runTest() {
-        whenever(autosensDataStore.lastUsed5minCalculation).thenReturn(null)
+        `when`(autosensDataStore.lastUsed5minCalculation).thenReturn(null)
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.UNKNOWN)
         assertThat(plugin.icon()).isEqualTo(0)
-        whenever(autosensDataStore.lastUsed5minCalculation).thenReturn(true)
+        `when`(autosensDataStore.lastUsed5minCalculation).thenReturn(true)
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.FIVE_MIN_DATA)
         assertThat(plugin.icon()).isEqualTo(0)
-        whenever(autosensDataStore.lastUsed5minCalculation).thenReturn(false)
+        `when`(autosensDataStore.lastUsed5minCalculation).thenReturn(false)
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.RECALCULATED)
         assertThat(plugin.icon()).isEqualTo(R.drawable.ic_baseline_warning_24_yellow)
@@ -102,12 +102,12 @@ class BgQualityCheckPluginTest : TestBase() {
                 trendArrow = TrendArrow.FLAT
             )
         )
-        whenever(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(superData)
+        `when`(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(superData)
 
-        whenever(autosensDataStore.lastUsed5minCalculation).thenReturn(true)
+        `when`(autosensDataStore.lastUsed5minCalculation).thenReturn(true)
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.FIVE_MIN_DATA)
-        whenever(autosensDataStore.lastUsed5minCalculation).thenReturn(false)
+        `when`(autosensDataStore.lastUsed5minCalculation).thenReturn(false)
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.RECALCULATED)
 
@@ -162,9 +162,9 @@ class BgQualityCheckPluginTest : TestBase() {
                 trendArrow = TrendArrow.FLAT
             )
         )
-        whenever(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(duplicatedData)
+        `when`(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(duplicatedData)
 
-        whenever(autosensDataStore.lastUsed5minCalculation).thenReturn(true)
+        `when`(autosensDataStore.lastUsed5minCalculation).thenReturn(true)
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.DOUBLED)
         assertThat(plugin.icon()).isEqualTo(R.drawable.ic_baseline_warning_24_red)
@@ -220,9 +220,9 @@ class BgQualityCheckPluginTest : TestBase() {
                 trendArrow = TrendArrow.FLAT
             )
         )
-        whenever(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(identicalData)
+        `when`(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(identicalData)
 
-        whenever(autosensDataStore.lastUsed5minCalculation).thenReturn(false)
+        `when`(autosensDataStore.lastUsed5minCalculation).thenReturn(false)
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.DOUBLED)
 
@@ -328,8 +328,8 @@ class BgQualityCheckPluginTest : TestBase() {
                 trendArrow = TrendArrow.FLAT
             )
         )
-        whenever(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(flatData)
-        whenever(iobCobCalculator.ads.lastBg()).thenReturn(InMemoryGlucoseValue.fromGv(flatData[0]))
+        `when`(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(flatData)
+        `when`(iobCobCalculator.ads.lastBg()).thenReturn(InMemoryGlucoseValue.fromGv(flatData[0]))
 
         plugin.processBgData()
         assertThat(plugin.state).isEqualTo(BgQualityCheck.State.FLAT)
@@ -437,8 +437,8 @@ class BgQualityCheckPluginTest : TestBase() {
                 trendArrow = TrendArrow.FLAT
             )
         )
-        whenever(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(flatDataDexcom)
-        whenever(iobCobCalculator.ads.lastBg()).thenReturn(InMemoryGlucoseValue.fromGv(flatDataDexcom[0]))
+        `when`(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(flatDataDexcom)
+        `when`(iobCobCalculator.ads.lastBg()).thenReturn(InMemoryGlucoseValue.fromGv(flatDataDexcom[0]))
 
         plugin.processBgData()
         assertThat(plugin.state).isNotEqualTo(BgQualityCheck.State.FLAT)
@@ -466,8 +466,8 @@ class BgQualityCheckPluginTest : TestBase() {
                 trendArrow = TrendArrow.FLAT
             )
         )
-        whenever(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(incompleteData)
-        whenever(iobCobCalculator.ads.lastBg()).thenReturn(InMemoryGlucoseValue.fromGv(incompleteData[0]))
+        `when`(autosensDataStore.getBgReadingsDataTableCopy()).thenReturn(incompleteData)
+        `when`(iobCobCalculator.ads.lastBg()).thenReturn(InMemoryGlucoseValue.fromGv(incompleteData[0]))
         plugin.processBgData()// must be more than 5 values
         assertThat(plugin.state).isNotEqualTo(BgQualityCheck.State.FLAT)
         flatData.add(

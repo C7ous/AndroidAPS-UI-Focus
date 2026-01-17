@@ -167,7 +167,6 @@ class RileyLinkMedtronicService : RileyLinkService() {
                 if (!rileyLinkAddress.matches(regexMac.toRegex())) {
                     medtronicPumpStatus.errorDescription = rh.gs(R.string.medtronic_error_rileylink_address_invalid)
                     aapsLogger.debug(LTag.PUMP, "RileyLink address invalid: %s", rileyLinkAddress)
-                    return false
                 } else {
                     if (rileyLinkAddress != this.rileyLinkAddress) {
                         this.rileyLinkAddress = rileyLinkAddress

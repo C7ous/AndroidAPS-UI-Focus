@@ -7,7 +7,7 @@ import app.aaps.shared.tests.TestBaseWithProfile
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 open class DanaRSTestBase : TestBaseWithProfile() {
 
@@ -17,7 +17,7 @@ open class DanaRSTestBase : TestBaseWithProfile() {
 
     @BeforeEach
     fun prepare() {
-        whenever(rh.gs(ArgumentMatchers.anyInt())).thenReturn("AnyString")
+        Mockito.`when`(rh.gs(ArgumentMatchers.anyInt())).thenReturn("AnyString")
     }
 
     fun createArray(length: Int, fillWith: Byte): ByteArray {

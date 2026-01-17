@@ -1,20 +1,18 @@
+@file:Suppress("DEPRECATION")
+
 package app.aaps.wear.complications
 
 import android.app.PendingIntent
-import androidx.wear.watchface.complications.data.ComplicationData
-import androidx.wear.watchface.complications.data.ComplicationType
-import androidx.wear.watchface.complications.data.PlainComplicationText
-import androidx.wear.watchface.complications.data.ShortTextComplicationData
+import android.support.wearable.complications.ComplicationData
+import android.support.wearable.complications.ComplicationText
 import app.aaps.core.interfaces.logging.LTag
+import app.aaps.wear.data.RawDisplayData
 import dagger.android.AndroidInjection
 
-/**
- * Basal Rate (BR) Complication
- *
- * Shows current basal rate with basal symbol
- *
+/*
+ * Created by olorinmaia on 2025-01-12
  */
-class BrComplication : ModernBaseComplicationProviderService() {
+class BrComplication : BaseComplicationProviderService() {
 
     // Not derived from DaggerService, do injection here
     override fun onCreate() {
@@ -22,28 +20,17 @@ class BrComplication : ModernBaseComplicationProviderService() {
         super.onCreate()
     }
 
-    override fun buildComplicationData(
-        type: ComplicationType,
-        data: app.aaps.wear.data.ComplicationData,
-        complicationPendingIntent: PendingIntent
-    ): ComplicationData? {
-        val statusData = data.statusData
-
-        return when (type) {
-            ComplicationType.SHORT_TEXT      -> {
-                ShortTextComplicationData.Builder(
-                    text = PlainComplicationText.Builder(text = displayFormat.basalRateSymbol() + statusData.currentBasal).build(),
-                    contentDescription = PlainComplicationText.Builder(text = "Basal Rate").build()
-                )
-                    .setTapAction(complicationPendingIntent)
-                    .build()
-            }
-
-            else                             -> {
-                aapsLogger.warn(LTag.WEAR, "Unexpected complication type $type")
-                null
-            }
+    override fun buildComplicationData(dataType: Int, raw: RawDisplayData, complicationPendingIntent: PendingIntent): ComplicationData? {
+        var complicationData: ComplicationData? = null
+        if (dataType == ComplicationData.TYPE_SHORT_TEXT) {
+            val builder = ComplicationData.Builder(ComplicationData.TYPE_SHORT_TEXT)
+                .setShortText(ComplicationText.plainText(displayFormat.basalRateSymbol() + raw.status[0].currentBasal))
+                .setTapAction(complicationPendingIntent)
+            complicationData = builder.build()
+        } else {
+            aapsLogger.warn(LTag.WEAR, "Unexpected complication type $dataType")
         }
+        return complicationData
     }
 
     override fun getProviderCanonicalName(): String = BrComplication::class.java.canonicalName!!

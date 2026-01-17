@@ -7,7 +7,7 @@ import app.aaps.pump.medtrum.keys.MedtrumStringNonKey
 import app.aaps.shared.tests.TestBaseWithProfile
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 open class MedtrumTestBase : TestBaseWithProfile() {
 
@@ -19,7 +19,7 @@ open class MedtrumTestBase : TestBaseWithProfile() {
 
     @BeforeEach
     fun setup() {
-        whenever(preferences.get(MedtrumStringNonKey.ActiveAlarms)).thenReturn("")
+        Mockito.`when`(preferences.get(MedtrumStringNonKey.ActiveAlarms)).thenReturn("")
         medtrumPump = MedtrumPump(aapsLogger, rh, preferences, dateUtil, pumpSync, temporaryBasalStorage)
     }
 }

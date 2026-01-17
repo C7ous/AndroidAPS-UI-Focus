@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package app.aaps.wear.watchfaces
 
 import android.annotation.SuppressLint
@@ -6,9 +8,10 @@ import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.graphics.Point
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.text.format.DateFormat
+import android.support.wearable.watchface.WatchFaceStyle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -23,9 +26,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.toColorInt
 import androidx.core.view.forEach
-import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.rx.events.EventUpdateSelectedWatchface
@@ -50,21 +51,20 @@ import app.aaps.wear.R
 import app.aaps.wear.databinding.ActivityCustomBinding
 import app.aaps.wear.watchfaces.utils.BaseWatchFace
 import app.aaps.wear.watchfaces.utils.WatchfaceViewAdapter.Companion.SelectedWatchFace
-import kotlinx.coroutines.runBlocking
+import org.joda.time.DateTime
+import org.joda.time.TimeOfDay
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.temporal.WeekFields
 import javax.inject.Inject
 import kotlin.math.floor
 
-@SuppressLint("Deprecated")
+@SuppressLint("UseCompatLoadingForDrawables")
 class CustomWatchface : BaseWatchFace() {
 
     @Inject lateinit var context: Context
     private lateinit var binding: ActivityCustomBinding
     private var zoomFactor = 1.0
+    private val displaySize = Point()
     private val templeResolution = 400
     private var lowBatColor = Color.RED
     private var resDataMap: CwfResDataMap = mutableMapOf()
@@ -92,40 +92,24 @@ class CustomWatchface : BaseWatchFace() {
         else -> reservoirColor
     }
 
+    @Suppress("DEPRECATION")
     override fun inflateLayout(inflater: LayoutInflater): ViewBinding {
         sp.putInt(R.string.key_last_selected_watchface, SelectedWatchFace.CUSTOM.ordinal)
         rxBus.send(EventUpdateSelectedWatchface())
         binding = ActivityCustomBinding.inflate(inflater)
         setDefaultColors()
-        runBlocking {
-            complicationDataRepository.storeCustomWatchface(
-                customWatchface = defaultWatchface(false).customWatchfaceData,
-                customWatchfaceFull = defaultWatchface(true).customWatchfaceData,
-                isDefault = true
-            )
-        }
-        val windowManager = context.getSystemService(WINDOW_SERVICE) as WindowManager
-        val displayWidth = windowManager.currentWindowMetrics.bounds.width()
-        zoomFactor = displayWidth.toDouble() / templeResolution.toDouble()
+        persistence.store(defaultWatchface(false), defaultWatchface(true), true)
+        (context.getSystemService(WINDOW_SERVICE) as WindowManager).defaultDisplay.getSize(displaySize)
+        zoomFactor = (displaySize.x).toDouble() / templeResolution.toDouble()
         return binding
     }
 
-    // Always update at 1 second intervals for smooth analog clock hand movement
-    override fun getInteractiveModeUpdateRate(): Long = 1000L
-
-    override fun onTimeChanged(oldTime: app.aaps.wear.watchfaces.utils.WatchFaceTime, newTime: app.aaps.wear.watchfaces.utils.WatchFaceTime) {
-        super.onTimeChanged(oldTime, newTime)
-        // Update analog clock hands every second for smooth movement
-        if (::binding.isInitialized && newTime.hasSecondChanged(oldTime)) {
-            updateClockHands()
-        }
-    }
-
-    private fun updateClockHands() {
-        val now = LocalTime.now()
-        binding.secondHand.rotation = now.second * 6f
-        binding.minuteHand.rotation = now.minute * 6f + now.second * 0.1f
-        binding.hourHand.rotation = now.hour * 30f + now.minute * 0.5f + now.second * (0.5f / 60f)
+    override fun getWatchFaceStyle(): WatchFaceStyle {
+        return WatchFaceStyle.Builder(this)
+            .setAcceptsTapEvents(true)
+            .setHideNotificationIndicator(false)
+            .setShowUnreadCountIndicator(true)
+            .build()
     }
 
     override fun setDataFields() {
@@ -133,8 +117,12 @@ class CustomWatchface : BaseWatchFace() {
         binding.direction.setImageDrawable(TrendArrowMap.drawable())
         binding.directionExt1.setImageDrawable(TrendArrowMap.drawableExt1())
         binding.directionExt2.setImageDrawable(TrendArrowMap.drawableExt2())
-        // Update analog clock hands
-        updateClockHands()
+        // rotate the second hand.
+        binding.secondHand.rotation = TimeOfDay().secondOfMinute * 6f
+        // rotate the minute hand.
+        binding.minuteHand.rotation = TimeOfDay().minuteOfHour * 6f
+        // rotate the hour hand.
+        binding.hourHand.rotation = TimeOfDay().hourOfDay * 30f + TimeOfDay().minuteOfHour * 0.5f
     }
 
     override fun setColorDark() {
@@ -209,30 +197,28 @@ class CustomWatchface : BaseWatchFace() {
         else
             getString(R.string.hour_minute, dateUtil.hourString(), dateUtil.minuteString())
         binding.second.text = dateUtil.secondString()
-        // Update analog clock hands for smooth movement
-        updateClockHands()
+        // rotate the second hand.
+        binding.secondHand.rotation = TimeOfDay().secondOfMinute * 6f
     }
 
     override fun updateSecondVisibility() {
-        binding.second.visibility = (binding.second.isVisible && showSecond).toVisibility()
-        binding.secondHand.visibility = (binding.secondHand.isVisible && showSecond).toVisibility()
+        binding.second.visibility = (binding.second.visibility == View.VISIBLE && showSecond).toVisibility()
+        binding.secondHand.visibility = (binding.secondHand.visibility == View.VISIBLE && showSecond).toVisibility()
     }
 
     private fun setWatchfaceStyle() {
-        var customWatchfaceData = runBlocking {
-            complicationDataRepository.getCustomWatchface() ?: complicationDataRepository.getCustomWatchface(true)
-        }
-        if (customWatchfaceData == null) { // if neither CWF or Default CWF is found, then force reload of default Layout
+        var customWatchface = persistence.readCustomWatchface() ?: persistence.readCustomWatchface(true)
+        if (customWatchface == null) { // if neither CWF or Default CWF is found within persistence, then force reload of default Layout
             super.onCreate()
-            customWatchfaceData = runBlocking { complicationDataRepository.getCustomWatchface(true) }
+            customWatchface = persistence.readCustomWatchface(true)
         }
-        customWatchfaceData?.let {
-            updatePref(it.metadata)
+        customWatchface?.let {
+            updatePref(it.customWatchfaceData.metadata)
             try {
-                json = JSONObject(it.json)
-                if (!resDataMap.isEquals(it.resData) || jsonString != it.json) {
-                    resDataMap = it.resData
-                    jsonString = it.json
+                json = JSONObject(it.customWatchfaceData.json)
+                if (!resDataMap.isEquals(it.customWatchfaceData.resData) || jsonString != it.customWatchfaceData.json) {
+                    resDataMap = it.customWatchfaceData.resData
+                    jsonString = it.customWatchfaceData.json
                     DynProvider.init(this, json)
                     FontMap.init(this)
                     ViewMap.init(this)
@@ -277,19 +263,17 @@ class CustomWatchface : BaseWatchFace() {
                             is lecho.lib.hellocharts.view.LineChartView -> viewMap.customizeGraphView(view)
                             else                                        -> viewMap.customizeViewCommon(view)
                         }
-                        if (viewMap.external == 1 && view.isVisible)
+                        if (viewMap.external == 1 && view.visibility == View.VISIBLE)
                             enableExt1 = true
 
-                        if (viewMap.external == 2 && view.isVisible)
+                        if (viewMap.external == 2 && view.visibility == View.VISIBLE)
                             enableExt2 = true
                     }
                 }
                 manageSpecificViews()
             } catch (_: Exception) {
                 aapsLogger.debug(LTag.WEAR, "Crash during Custom watch load")
-                runBlocking {
-                    complicationDataRepository.storeCustomWatchface(defaultWatchface(true).customWatchfaceData, isDefault = false)
-                } // reload correct values to avoid crash of watchface
+                persistence.store(defaultWatchface(true), isDefault = false) // relaod correct values to avoid crash of watchface
             }
         }
     }
@@ -377,9 +361,9 @@ class CustomWatchface : BaseWatchFace() {
     }
 
     private fun setDefaultColors() {
-        highColor = "#FFFF00".toColorInt()
-        midColor = "#00FF00".toColorInt()
-        lowColor = "#FF0000".toColorInt()
+        highColor = Color.parseColor("#FFFF00")
+        midColor = Color.parseColor("#00FF00")
+        lowColor = Color.parseColor("#FF0000")
         carbColor = ContextCompat.getColor(this, R.color.carbs)
         basalBackgroundColor = ContextCompat.getColor(this, R.color.basal_dark)
         basalCenterColor = ContextCompat.getColor(this, R.color.basal_light)
@@ -442,7 +426,7 @@ class CustomWatchface : BaseWatchFace() {
             JsonKeyValues.BGCOLOR_EXT2.key -> bgColor(2)
             else                           ->
                 try {
-                    color.toColorInt()
+                    Color.parseColor(color)
                 } catch (_: Exception) {
                     defaultColor
                 }
@@ -457,7 +441,7 @@ class CustomWatchface : BaseWatchFace() {
         binding.background.visibility = View.VISIBLE
         updateSecondVisibility()
         setSecond() // Update second visibility for time view
-        binding.timePeriod.visibility = (binding.timePeriod.isVisible && DateFormat.is24HourFormat(this).not()).toVisibility()
+        binding.timePeriod.visibility = (binding.timePeriod.visibility == View.VISIBLE && android.text.format.DateFormat.is24HourFormat(this).not()).toVisibility()
     }
 
     private enum class ViewMap(
@@ -709,7 +693,7 @@ class CustomWatchface : BaseWatchFace() {
                         it.clearColorFilter()
                     view.setImageDrawable(it)
                 } ?: apply {
-                    view.setImageDrawable(defaultDrawable?.let { ResourcesCompat.getDrawable(cwf.resources, it, cwf.theme) })
+                    view.setImageDrawable(defaultDrawable?.let { cwf.resources.getDrawable(it) })
                     if (viewJson.has(JsonKeys.COLOR.key) || (dynData?.stepColor ?: 0) > 0)       // works on xml included into res files
                         view.setColorFilter(dynData?.getColorStep() ?: cwf.getColor(viewJson.optString(JsonKeys.COLOR.key)))
                     else
@@ -766,14 +750,15 @@ class CustomWatchface : BaseWatchFace() {
 
         lateinit var cwf: CustomWatchface
         var arrowCustom: Drawable? = null
-            get() = field ?: customDrawable?.let { cwf.resDataMap[it.fileName]?.toDrawable(cwf.resources)?.also { arrowCustom = it } } ?: ResourcesCompat.getDrawable(cwf.resources, icon, cwf.theme)
+            get() = field ?: customDrawable?.let { cwf.resDataMap[it.fileName]?.toDrawable(cwf.resources)?.also { arrowCustom = it } } ?: cwf.resources.getDrawable(icon)
     }
 
+    @SuppressLint("RtlHardcoded")
     private enum class GravityMap(val key: String, val gravity: Int) {
 
         CENTER(JsonKeyValues.CENTER.key, Gravity.CENTER),
-        LEFT(JsonKeyValues.LEFT.key, Gravity.START),
-        RIGHT(JsonKeyValues.RIGHT.key, Gravity.END);
+        LEFT(JsonKeyValues.LEFT.key, Gravity.LEFT),
+        RIGHT(JsonKeyValues.RIGHT.key, Gravity.RIGHT);
 
         companion object {
 
@@ -975,10 +960,10 @@ class CustomWatchface : BaseWatchFace() {
                 ValueMap.UPLOADER_BATTERY -> cwf.status[0].battery.replace("%", "").toDoubleOrNull()
                 ValueMap.LOOP             -> if (cwf.status[0].openApsStatus != -1L) ((System.currentTimeMillis() - cwf.status[0].openApsStatus) / 1000 / 60).toDouble() else null
                 ValueMap.TIMESTAMP        -> if (cwf.singleBg[0].timeStamp != 0L) floor(cwf.timeSince() / (1000 * 60)) else null
-                ValueMap.DAY              -> LocalDateTime.now().dayOfMonth.toDouble()
-                ValueMap.DAY_NAME         -> LocalDateTime.now().dayOfWeek.value.toDouble()
-                ValueMap.MONTH            -> LocalDateTime.now().monthValue.toDouble()
-                ValueMap.WEEK_NUMBER      -> LocalDateTime.now().get(WeekFields.ISO.weekOfWeekBasedYear()).toDouble()
+                ValueMap.DAY              -> DateTime().dayOfMonth.toDouble()
+                ValueMap.DAY_NAME         -> DateTime().dayOfWeek.toDouble()
+                ValueMap.MONTH            -> DateTime().monthOfYear.toDouble()
+                ValueMap.WEEK_NUMBER      -> DateTime().weekOfWeekyear.toDouble()
                 ValueMap.SGV_EXT1         -> if (cwf.singleBg[1].sgvString != "---") cwf.singleBg[1].sgv else null
                 ValueMap.SGV_LEVEL_EXT1   -> if (cwf.singleBg[1].sgvString != "---") cwf.singleBg[1].sgvLevel.toDouble() else null
                 ValueMap.DIRECTION_EXT1   -> TrendArrowMap.valueExt1()

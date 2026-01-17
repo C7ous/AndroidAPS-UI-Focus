@@ -43,7 +43,6 @@ object JsonHelper {
         if (json != null && json.has(fieldName)) {
             try {
                 result = json.getString(fieldName)
-                if (result == JSONObject.NULL.toString()) result = defaultValue
             } catch (_: JSONException) {
             }
         }
@@ -55,7 +54,6 @@ object JsonHelper {
         if (json != null && json.has(fieldName)) {
             try {
                 result = json.getString(fieldName)
-                if (result == JSONObject.NULL.toString()) result = defaultValue
             } catch (_: JSONException) {
             }
         }

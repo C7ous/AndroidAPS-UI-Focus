@@ -16,30 +16,29 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import java.util.concurrent.TimeUnit
 
 internal class HeartRateListenerTest {
 
     private val aapsLogger = AAPSLoggerTest()
     private val aapsSchedulers = object : AapsSchedulers {
-        override val main: Scheduler = mock()
-        override val io: Scheduler = mock()
-        override val cpu: Scheduler = mock()
-        override val newThread: Scheduler = mock()
+        override val main: Scheduler = mock(Scheduler::class.java)
+        override val io: Scheduler = mock(Scheduler::class.java)
+        override val cpu: Scheduler = mock(Scheduler::class.java)
+        override val newThread: Scheduler = mock(Scheduler::class.java)
     }
-    private val schedule: Disposable = mock()
-    private val sp: SP = mock()
+    private val schedule = mock(Disposable::class.java)
+    private val sp = mock(SP::class.java)
     private val heartRates = mutableListOf<ActionHeartRate>()
     private val device = "unknown unknown"
 
     private fun create(timestampMillis: Long): HeartRateListener {
-        val ctx: Context = mock()
-        whenever(
+        val ctx = mock(Context::class.java)
+        `when`(
             aapsSchedulers.io.schedulePeriodicallyDirect(
                 any(), eq(60_000L), eq(60_000L), eq(TimeUnit.MILLISECONDS)
             )
@@ -69,16 +68,16 @@ internal class HeartRateListenerTest {
 
     @AfterEach
     fun cleanup() {
-        verifyNoInteractions(aapsSchedulers.main)
-        verifyNoMoreInteractions(aapsSchedulers.io)
-        verifyNoInteractions(aapsSchedulers.cpu)
-        verifyNoInteractions(aapsSchedulers.newThread)
+        Mockito.verifyNoInteractions(aapsSchedulers.main)
+        Mockito.verifyNoMoreInteractions(aapsSchedulers.io)
+        Mockito.verifyNoInteractions(aapsSchedulers.cpu)
+        Mockito.verifyNoInteractions(aapsSchedulers.newThread)
         verify(schedule).dispose()
     }
 
     @Test
     fun onSensorChanged() {
-        whenever(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
+        `when`(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
         val start = System.currentTimeMillis()
         val d1 = 10_000L
         val d2 = 20_000L
@@ -96,7 +95,7 @@ internal class HeartRateListenerTest {
 
     @Test
     fun onSensorChanged2() {
-        whenever(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
+        `when`(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
         val start = System.currentTimeMillis()
         val d1 = 10_000L
         val d2 = 40_000L
@@ -117,7 +116,7 @@ internal class HeartRateListenerTest {
 
     @Test
     fun onSensorChangedMultiple() {
-        whenever(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
+        `when`(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
         val start = System.currentTimeMillis()
         val d1 = 10_000L
         val d2 = 40_000L
@@ -139,7 +138,7 @@ internal class HeartRateListenerTest {
 
     @Test
     fun onSensorChangedNoContact() {
-        whenever(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
+        `when`(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
         val start = System.currentTimeMillis()
         val d1 = 10_000L
         val d2 = 40_000L
@@ -156,7 +155,7 @@ internal class HeartRateListenerTest {
 
     @Test
     fun onAccuracyChanged() {
-        whenever(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
+        `when`(sp.getInt(R.string.key_heart_rate_smoothing, 1)).thenReturn(1)
         val start = System.currentTimeMillis()
         val d1 = 10_000L
         val d2 = 40_000L

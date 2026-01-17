@@ -39,9 +39,6 @@ dependencies {
     api(libs.com.squareup.retrofit2.retrofit)
     api(libs.com.squareup.retrofit2.converter.gson)
 
-    testImplementation(project(":shared:tests"))
-    testImplementation(project(":core:objects"))
-
     ksp(libs.com.google.dagger.compiler)
     ksp(libs.com.google.dagger.android.processor)
 }

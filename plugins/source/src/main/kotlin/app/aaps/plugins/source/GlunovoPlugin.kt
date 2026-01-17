@@ -5,8 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
-import androidx.annotation.VisibleForTesting
-import androidx.core.net.toUri
 import app.aaps.core.data.configuration.Constants
 import app.aaps.core.data.model.GV
 import app.aaps.core.data.model.GlucoseUnit
@@ -52,13 +50,10 @@ class GlunovoPlugin @Inject constructor(
     aapsLogger, resourceHelper, preferences
 ), BgSource {
 
-    @VisibleForTesting
-    var handler: Handler? = null
+    private var handler: Handler? = null
+    private var refreshLoop: Runnable
 
-    @VisibleForTesting
-    var refreshLoop: Runnable
-
-    private val contentUri: Uri = "content://$AUTHORITY/$TABLE_NAME".toUri()
+    private val contentUri: Uri = Uri.parse("content://$AUTHORITY/$TABLE_NAME")
 
     init {
         refreshLoop = Runnable {
@@ -84,15 +79,13 @@ class GlunovoPlugin @Inject constructor(
 
     override fun onStop() {
         super.onStop()
-        handler?.removeCallbacksAndMessages(null)
-        handler?.looper?.quit()
+        handler?.removeCallbacks(refreshLoop)
         handler = null
         disposable.clear()
     }
 
     @SuppressLint("CheckResult")
-    @VisibleForTesting
-    fun handleNewData() {
+    private fun handleNewData() {
         if (!isEnabled()) return
 
         try {
@@ -118,7 +111,7 @@ class GlunovoPlugin @Inject constructor(
                         continue
                     }
 
-                    if (value !in 2.0..25.0) {
+                    if (value < 2 || value > 25) {
                         aapsLogger.error(LTag.BGSOURCE, "Error in received data value (value out of bounds) $value")
                         cr.moveToNext()
                         continue
@@ -147,7 +140,8 @@ class GlunovoPlugin @Inject constructor(
                 cr.close()
 
                 if (glucoseValues.isNotEmpty() || calibrations.isNotEmpty())
-                    persistenceLayer.insertCgmSourceData(Sources.Glunovo, glucoseValues, calibrations, null).blockingGet()
+                    persistenceLayer.insertCgmSourceData(Sources.Glunovo, glucoseValues, calibrations, null)
+                        .blockingGet()
             }
         } catch (e: SecurityException) {
             aapsLogger.error(LTag.CORE, "Exception", e)

@@ -11,12 +11,12 @@ class TriggerTempTargetTest : TriggerTestBase() {
 
     /*
        @Test fun shouldRunTest() {
-           whenever(repository.getTemporaryTargetActiveAt(anyOrNull())).thenReturn(null)
+           `when`(repository.getTemporaryTargetActiveAt(anyObject())).thenReturn(null)
            var t: TriggerTempTarget = TriggerTempTarget(injector).comparator(ComparatorExists.Compare.EXISTS)
            assertThat(t.shouldRun()).isFalse()
            t = TriggerTempTarget(injector).comparator(ComparatorExists.Compare.NOT_EXISTS)
            assertThat(t.shouldRun()).isTrue()
-           whenever(repository.getTemporaryTargetActiveAt(anyOrNull())).thenReturn(TemporaryTarget(duration = 0, highTarget = 0.0, lowTarget = 0.0, reason = TemporaryTarget.Reason.CUSTOM, timestamp = 0))
+           `when`(repository.getTemporaryTargetActiveAt(anyObject())).thenReturn(TemporaryTarget(duration = 0, highTarget = 0.0, lowTarget = 0.0, reason = TemporaryTarget.Reason.CUSTOM, timestamp = 0))
            t = TriggerTempTarget(injector).comparator(ComparatorExists.Compare.NOT_EXISTS)
            assertThat(t.shouldRun()).isFalse()
            t = TriggerTempTarget(injector).comparator(ComparatorExists.Compare.EXISTS)

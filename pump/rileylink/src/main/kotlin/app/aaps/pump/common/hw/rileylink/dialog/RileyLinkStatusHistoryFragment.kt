@@ -44,11 +44,6 @@ class RileyLinkStatusHistoryFragment : DaggerFragment() {
         refreshData()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun refreshData() {
         binding.historyList.adapter =
             RecyclerViewAdapter(rileyLinkUtil.rileyLinkHistory.filter { isValidItem(it) }.sortedWith(RLHistoryItem.Comparator()))

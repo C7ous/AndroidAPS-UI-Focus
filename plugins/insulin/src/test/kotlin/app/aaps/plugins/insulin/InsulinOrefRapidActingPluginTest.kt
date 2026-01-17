@@ -2,24 +2,33 @@ package app.aaps.plugins.insulin
 
 import app.aaps.core.interfaces.configuration.Config
 import app.aaps.core.interfaces.insulin.Insulin
+import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.profile.ProfileFunction
 import app.aaps.core.interfaces.resources.ResourceHelper
+import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.interfaces.utils.HardLimits
-import app.aaps.shared.tests.TestBase
 import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
+import org.mockito.quality.Strictness
 
-class InsulinOrefRapidActingPluginTest : TestBase() {
+@ExtendWith(MockitoExtension::class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class InsulinOrefRapidActingPluginTest {
 
     private lateinit var sut: InsulinOrefRapidActingPlugin
 
     @Mock lateinit var rh: ResourceHelper
+    @Mock lateinit var rxBus: RxBus
     @Mock lateinit var profileFunction: ProfileFunction
+    @Mock lateinit var aapsLogger: AAPSLogger
     @Mock lateinit var config: Config
     @Mock lateinit var hardLimits: HardLimits
     @Mock lateinit var uiInteraction: UiInteraction
@@ -41,13 +50,13 @@ class InsulinOrefRapidActingPluginTest : TestBase() {
 
     @Test
     fun commentStandardTextTest() {
-        whenever(rh.gs(eq(R.string.fast_acting_insulin_comment))).thenReturn("Novorapid, Novolog, Humalog")
+        `when`(rh.gs(eq(R.string.fast_acting_insulin_comment))).thenReturn("Novorapid, Novolog, Humalog")
         assertThat(sut.commentStandardText()).isEqualTo("Novorapid, Novolog, Humalog")
     }
 
     @Test
     fun getFriendlyNameTest() {
-        whenever(rh.gs(eq(R.string.rapid_acting_oref))).thenReturn("Rapid-Acting Oref")
+        `when`(rh.gs(eq(R.string.rapid_acting_oref))).thenReturn("Rapid-Acting Oref")
         assertThat(sut.friendlyName).isEqualTo("Rapid-Acting Oref")
     }
 

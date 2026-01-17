@@ -8,18 +8,17 @@ import org.json.JSONObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 
 class TriggerIobTest : TriggerTestBase() {
 
     @BeforeEach fun mock() {
-        whenever(profileFunction.getProfile()).thenReturn(validProfile)
+        `when`(profileFunction.getProfile()).thenReturn(validProfile)
     }
 
     @Test fun shouldRunTest() {
-        whenever(iobCobCalculator.calculateFromTreatmentsAndTemps(ArgumentMatchers.anyLong(), anyOrNull())).thenReturn(generateIobRecordData())
+        `when`(iobCobCalculator.calculateFromTreatmentsAndTemps(ArgumentMatchers.anyLong(), anyObject())).thenReturn(generateIobRecordData())
         var t: TriggerIob = TriggerIob(injector).setValue(1.1).comparator(Comparator.Compare.IS_EQUAL)
         assertThat(t.shouldRun()).isFalse()
         t = TriggerIob(injector).setValue(1.0).comparator(Comparator.Compare.IS_EQUAL)

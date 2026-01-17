@@ -9,19 +9,19 @@ import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 
 class TriggerBgTest : TriggerTestBase() {
 
     @BeforeEach
     fun prepare() {
-        whenever(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
+        `when`(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
     }
 
     @Test
     fun shouldRunTest() {
-        whenever(autosensDataStore.getBucketedDataTableCopy()).thenReturn(generateOneCurrentRecordBgData())
+        `when`(autosensDataStore.getBucketedDataTableCopy()).thenReturn(generateOneCurrentRecordBgData())
         var t: TriggerBg = TriggerBg(injector).setUnits(GlucoseUnit.MMOL).setValue(4.1).comparator(Comparator.Compare.IS_EQUAL)
         assertThat(t.shouldRun()).isFalse()
         t = TriggerBg(injector).setUnits(GlucoseUnit.MGDL).setValue(214.0).comparator(Comparator.Compare.IS_EQUAL)
@@ -40,7 +40,7 @@ class TriggerBgTest : TriggerTestBase() {
         assertThat(t.shouldRun()).isTrue()
         t = TriggerBg(injector).setUnits(GlucoseUnit.MGDL).setValue(213.0).comparator(Comparator.Compare.IS_EQUAL_OR_LESSER)
         assertThat(t.shouldRun()).isFalse()
-        whenever(autosensDataStore.getBucketedDataTableCopy()).thenReturn(ArrayList())
+        `when`(autosensDataStore.getBucketedDataTableCopy()).thenReturn(ArrayList())
         t = TriggerBg(injector).setUnits(GlucoseUnit.MGDL).setValue(213.0).comparator(Comparator.Compare.IS_EQUAL_OR_LESSER)
         assertThat(t.shouldRun()).isFalse()
         t = TriggerBg(injector).comparator(Comparator.Compare.IS_NOT_AVAILABLE)

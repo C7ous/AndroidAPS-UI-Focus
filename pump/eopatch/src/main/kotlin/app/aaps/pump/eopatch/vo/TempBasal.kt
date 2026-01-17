@@ -40,7 +40,6 @@ class TempBasal {
         this.percent = 0
         this.durationMinutes = 0
         this.startTimestamp = 0
-        this.running = false
     }
 
     override fun toString(): String {

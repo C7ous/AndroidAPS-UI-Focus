@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 class BolusTimerImplTest : TestBase() {
 
@@ -52,8 +52,8 @@ class BolusTimerImplTest : TestBase() {
 
     @BeforeEach
     fun init() {
-        whenever(rh.gs(anyInt())).thenReturn("")
-        whenever(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
+        Mockito.`when`(rh.gs(anyInt())).thenReturn("")
+        Mockito.`when`(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
         dateUtil = DateUtilImpl(context)
         automationPlugin = AutomationPlugin(
             injector, aapsLogger, rh, preferences, context, fabricPrivacy, loop, rxBus, constraintChecker, aapsSchedulers, config, locationServiceHelper, dateUtil,

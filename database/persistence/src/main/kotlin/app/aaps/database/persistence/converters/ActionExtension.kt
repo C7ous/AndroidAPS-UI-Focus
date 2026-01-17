@@ -96,9 +96,6 @@ fun UserEntry.Action.fromDb(): Action =
         UserEntry.Action.PLUGIN_ENABLED                  -> Action.PLUGIN_ENABLED
         UserEntry.Action.PLUGIN_DISABLED                 -> Action.PLUGIN_DISABLED
         UserEntry.Action.UNKNOWN                         -> Action.UNKNOWN
-        UserEntry.Action.RUNNING_MODE                    -> Action.RUNNING_MODE
-        UserEntry.Action.RUNNING_MODE_REMOVED            -> Action.RUNNING_MODE_REMOVED
-        UserEntry.Action.RUNNING_MODE_UPDATED            -> Action.RUNNING_MODE_UPDATED
     }
 
 fun Action.toDb(): UserEntry.Action =
@@ -194,8 +191,5 @@ fun Action.toDb(): UserEntry.Action =
         Action.PLUGIN_ENABLED                  -> UserEntry.Action.PLUGIN_ENABLED
         Action.PLUGIN_DISABLED                 -> UserEntry.Action.PLUGIN_DISABLED
         Action.UNKNOWN                         -> UserEntry.Action.UNKNOWN
-        Action.RUNNING_MODE         -> UserEntry.Action.RUNNING_MODE
-        Action.RUNNING_MODE_REMOVED -> UserEntry.Action.RUNNING_MODE_REMOVED
-        Action.RUNNING_MODE_UPDATED -> UserEntry.Action.RUNNING_MODE_UPDATED
     }
 

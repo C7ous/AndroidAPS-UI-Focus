@@ -107,19 +107,13 @@ class EquilFragment : DaggerFragment() {
     override fun onPause() {
         super.onPause()
         disposable.clear()
-        handler.removeCallbacksAndMessages(null)
+        handler.removeCallbacks(refreshLoop)
     }
 
     @Synchronized
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
     }
 
     @SuppressLint("SetTextI18n")

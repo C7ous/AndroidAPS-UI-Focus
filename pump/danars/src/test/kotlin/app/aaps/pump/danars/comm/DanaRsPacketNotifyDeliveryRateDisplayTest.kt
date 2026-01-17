@@ -14,8 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 class DanaRsPacketNotifyDeliveryRateDisplayTest : DanaRSTestBase() {
 
@@ -30,7 +29,7 @@ class DanaRsPacketNotifyDeliveryRateDisplayTest : DanaRSTestBase() {
 
     @Test
     fun runTest() {
-        whenever(rh.gs(ArgumentMatchers.anyInt(), anyOrNull())).thenReturn("SomeString")
+        `when`(rh.gs(ArgumentMatchers.anyInt(), anyObject())).thenReturn("SomeString")
         danaPump.bolusingDetailedBolusInfo = DetailedBolusInfo().apply { insulin = 1.0 }
         val packet = DanaRSPacketNotifyDeliveryRateDisplay(aapsLogger, rh, rxBus, danaPump)
         // test params

@@ -14,7 +14,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 class TemporaryBasalExtensionKtTest : TestBaseWithProfile() {
 
@@ -28,8 +28,8 @@ class TemporaryBasalExtensionKtTest : TestBaseWithProfile() {
     @BeforeEach
     fun setup() {
         insulin = InsulinLyumjevPlugin(rh, profileFunctions, rxBus, aapsLogger, config, hardLimits, uiInteraction)
-        whenever(activePlugin.activeInsulin).thenReturn(insulin)
-        whenever(dateUtil.now()).thenReturn(now)
+        Mockito.`when`(activePlugin.activeInsulin).thenReturn(insulin)
+        Mockito.`when`(dateUtil.now()).thenReturn(now)
     }
 
     @Test

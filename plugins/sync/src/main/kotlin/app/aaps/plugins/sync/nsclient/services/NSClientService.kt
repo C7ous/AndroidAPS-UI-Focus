@@ -220,8 +220,6 @@ class NSClientService : DaggerService() {
     override fun onDestroy() {
         super.onDestroy()
         disposable.clear()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
         if (wakeLock?.isHeld == true) wakeLock?.release()
     }
 

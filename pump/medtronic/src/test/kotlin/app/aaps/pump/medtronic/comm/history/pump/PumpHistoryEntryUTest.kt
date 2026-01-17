@@ -1,15 +1,15 @@
 package app.aaps.pump.medtronic.comm.history.pump
 
 import app.aaps.core.interfaces.ui.UiInteraction
+import com.google.common.truth.Truth.assertThat
 import app.aaps.pump.medtronic.MedtronicTestBase
 import app.aaps.pump.medtronic.defs.MedtronicDeviceType
 import app.aaps.pump.medtronic.driver.MedtronicPumpStatus
 import app.aaps.pump.medtronic.util.MedtronicUtil
-import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 /**
  * Created by andy on 4/9/19.
@@ -23,7 +23,7 @@ class PumpHistoryEntryUTest : MedtronicTestBase() {
     @BeforeEach
     fun setUp() {
         medtronicUtil = MedtronicUtil(aapsLogger, rxBus, rileyLinkUtil, medtronicPumpStatus, uiInteraction)
-        whenever(medtronicUtil.medtronicPumpModel).thenReturn(MedtronicDeviceType.Medtronic_723_Revel)
+        `when`(medtronicUtil.medtronicPumpModel).thenReturn(MedtronicDeviceType.Medtronic_723_Revel)
         decoder = MedtronicPumpHistoryDecoder(aapsLogger, medtronicUtil)
     }
 

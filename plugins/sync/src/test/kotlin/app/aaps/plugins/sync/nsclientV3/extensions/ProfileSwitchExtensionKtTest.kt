@@ -13,8 +13,9 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
+@Suppress("SpellCheckingInspection")
 internal class ProfileSwitchExtensionKtTest : TestBaseWithProfile() {
 
     @Mock lateinit var insulin: Insulin
@@ -23,8 +24,8 @@ internal class ProfileSwitchExtensionKtTest : TestBaseWithProfile() {
 
     @BeforeEach
     fun mock() {
-        whenever(insulin.iCfg).thenReturn(insulinConfiguration)
-        whenever(activePlugin.activeInsulin).thenReturn(insulin)
+        Mockito.`when`(insulin.iCfg).thenReturn(insulinConfiguration)
+        Mockito.`when`(activePlugin.activeInsulin).thenReturn(insulin)
     }
 
     @Test

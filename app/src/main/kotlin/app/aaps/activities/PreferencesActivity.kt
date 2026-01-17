@@ -20,7 +20,6 @@ class PreferencesActivity : DaggerAppCompatActivityWithResult(), PreferenceFragm
     private var customPreference: UiInteraction.Preferences? = null
     private var myPreferenceFragment: MyPreferenceFragment? = null
     private var searchView: SearchView? = null
-    private var preferencesMenuProvider: MenuProvider? = null
 
     private lateinit var binding: ActivityPreferencesBinding
 
@@ -44,7 +43,7 @@ class PreferencesActivity : DaggerAppCompatActivityWithResult(), PreferenceFragm
             supportFragmentManager.beginTransaction().replace(R.id.frame_layout, myPreferenceFragment!!).commit()
 
         // Add menu items without overriding methods in the Activity
-        preferencesMenuProvider = object : MenuProvider {
+        addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 // Add menu items here
                 menuInflater.inflate(R.menu.menu_preferences, menu)
@@ -70,14 +69,7 @@ class PreferencesActivity : DaggerAppCompatActivityWithResult(), PreferenceFragm
 
                     else              -> false
                 }
-        }
-        preferencesMenuProvider?.let { addMenuProvider(it) }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        searchView?.setOnQueryTextListener(null)
-        preferencesMenuProvider?.let { removeMenuProvider(it) }
+        })
     }
 
     override fun onPreferenceStartScreen(caller: PreferenceFragmentCompat, pref: PreferenceScreen): Boolean {

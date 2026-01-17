@@ -233,7 +233,7 @@ class OmnipodDashOverviewFragment : DaggerFragment() {
     override fun onPause() {
         super.onPause()
         disposables.clear()
-        handler.removeCallbacksAndMessages(null)
+        handler.removeCallbacks(refreshLoop)
     }
 
     @Synchronized
@@ -243,12 +243,6 @@ class OmnipodDashOverviewFragment : DaggerFragment() {
         _bluetoothStatusBinding = null
         _buttonBinding = null
         _podInfoBinding = null
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
     }
 
     private fun updateUi() {

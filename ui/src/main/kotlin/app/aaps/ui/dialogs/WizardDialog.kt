@@ -316,20 +316,10 @@ class WizardDialog : DaggerDialogFragment() {
         binding.carbTimeInputLabel.labelFor = binding.carbTimeInput.editTextId
     }
 
-    override fun onPause() {
-        super.onPause()
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        disposable.clear()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        disposable.clear()
+        handler.removeCallbacksAndMessages(null)
         _binding = null
     }
 

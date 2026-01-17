@@ -10,15 +10,20 @@ import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.interfaces.utils.HardLimits
-import app.aaps.shared.tests.TestBase
 import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
+import org.mockito.quality.Strictness
 
-class InsulinOrefBasePluginTest : TestBase() {
+@ExtendWith(MockitoExtension::class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class InsulinOrefBasePluginTest {
 
     var testPeak = 0
     var testUserDefinedDia = 0.0
@@ -54,6 +59,8 @@ class InsulinOrefBasePluginTest : TestBase() {
 
     @Mock lateinit var rh: ResourceHelper
     @Mock lateinit var profileFunction: ProfileFunction
+    @Mock lateinit var rxBus: RxBus
+    @Mock lateinit var aapsLogger: AAPSLogger
     @Mock lateinit var config: Config
     @Mock lateinit var hardLimits: HardLimits
     @Mock lateinit var uiInteraction: UiInteraction
@@ -61,7 +68,7 @@ class InsulinOrefBasePluginTest : TestBase() {
     @BeforeEach
     fun setUp() {
         sut = InsulinBaseTest(rh, profileFunction, rxBus, aapsLogger, config, hardLimits)
-        whenever(hardLimits.minDia()).thenReturn(5.0)
+        `when`(hardLimits.minDia()).thenReturn(5.0)
     }
 
     @Test

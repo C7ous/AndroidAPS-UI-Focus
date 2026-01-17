@@ -8,19 +8,19 @@ import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 
 class TriggerTempTargetValueTest : TriggerTestBase() {
 
     @BeforeEach
     fun prepare() {
-        whenever(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
+        `when`(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
     }
 
     @Test
     fun shouldRunTest() {
-        whenever(persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now())).thenReturn(
+        `when`(persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now())).thenReturn(
             TT(
                 duration = 60000,
                 highTarget = 140.0,
@@ -51,7 +51,7 @@ class TriggerTempTargetValueTest : TriggerTestBase() {
         assertThat(t.shouldRun()).isFalse()
         t = TriggerTempTargetValue(injector).comparator(Comparator.Compare.IS_NOT_AVAILABLE)
         assertThat(t.shouldRun()).isFalse()
-        whenever(persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now())).thenReturn(null)
+        `when`(persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now())).thenReturn(null)
         assertThat(t.shouldRun()).isTrue()
     }
 

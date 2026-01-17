@@ -82,6 +82,7 @@ class BigLogInquireResponsePacket(
     @Inject lateinit var diaconnLogUploader: DiaconnLogUploader
     @Inject lateinit var context: Context
 
+    var result = 0// 조회결과
     private var pumpDesc = PumpDescription().fillFor(PumpType.DIACONN_G8)
 
     init {

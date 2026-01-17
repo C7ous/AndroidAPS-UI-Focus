@@ -4,13 +4,13 @@ import app.aaps.core.data.model.GlucoseUnit
 import app.aaps.core.data.model.TE
 import app.aaps.core.data.pump.defs.PumpDescription
 import app.aaps.core.data.time.T
-import app.aaps.plugins.automation.elements.Comparator
 import app.aaps.pump.virtual.VirtualPumpPlugin
+import app.aaps.plugins.automation.elements.Comparator
 import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 import java.util.Optional
 
@@ -20,7 +20,7 @@ class TriggerInsulinAgeTest : TriggerTestBase() {
 
     @Test fun shouldRunTest() {
         val insulinChangeEvent = TE(glucoseUnit = GlucoseUnit.MGDL, timestamp = now - T.hours(6).msecs(), type = TE.Type.INSULIN_CHANGE)
-        whenever(persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.INSULIN_CHANGE)).thenReturn(insulinChangeEvent)
+        `when`(persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.INSULIN_CHANGE)).thenReturn(insulinChangeEvent)
         var t: TriggerInsulinAge = TriggerInsulinAge(injector).setValue(1.0).comparator(Comparator.Compare.IS_EQUAL)
         assertThat(t.shouldRun()).isFalse()
         t = TriggerInsulinAge(injector).setValue(6.0).comparator(Comparator.Compare.IS_EQUAL)
@@ -40,7 +40,7 @@ class TriggerInsulinAgeTest : TriggerTestBase() {
     }
 
     @Test fun shouldRunNotAvailable() {
-        whenever(persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.INSULIN_CHANGE)).thenReturn(null)
+        `when`(persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.INSULIN_CHANGE)).thenReturn(null)
         var t = TriggerInsulinAge(injector).apply { comparator.value = Comparator.Compare.IS_NOT_AVAILABLE }
         assertThat(t.shouldRun()).isTrue()
         t = TriggerInsulinAge(injector).setValue(6.0).comparator(Comparator.Compare.IS_EQUAL)
@@ -49,10 +49,10 @@ class TriggerInsulinAgeTest : TriggerTestBase() {
 
     @Test fun shouldRunPatchPump() {
         val t: TriggerInsulinAge = TriggerInsulinAge(injector).setValue(6.0).comparator(Comparator.Compare.IS_EQUAL)
-        whenever(activePlugin.activePump).thenReturn(virtualPumpPlugin)
+        `when`(activePlugin.activePump).thenReturn(virtualPumpPlugin)
         val pumpDescription = PumpDescription()
         pumpDescription.isPatchPump = true
-        whenever(virtualPumpPlugin.pumpDescription).thenReturn(pumpDescription)
+        `when`(virtualPumpPlugin.pumpDescription).thenReturn(pumpDescription)
         assertThat(t.shouldRun()).isFalse()
     }
 

@@ -12,7 +12,7 @@ import app.aaps.shared.tests.TestBaseWithProfile
 import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 class AutosensDataStoreTest : TestBaseWithProfile() {
 
@@ -20,7 +20,7 @@ class AutosensDataStoreTest : TestBaseWithProfile() {
 
     @BeforeEach
     fun mock() {
-        whenever(iobCobCalculator.ads).thenReturn(autosensDataStore)
+        `when`(iobCobCalculator.ads).thenReturn(autosensDataStore)
     }
 
     @Test

@@ -108,7 +108,6 @@ class MainActivity : DaggerAppCompatActivityWithResult() {
     private var menuOpen = false
     private var isProtectionCheckActive = false
     private lateinit var binding: ActivityMainBinding
-    private var mainMenuProvider: MenuProvider? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -158,7 +157,7 @@ class MainActivity : DaggerAppCompatActivityWithResult() {
                 else finish()
             }
         })
-        mainMenuProvider = object : MenuProvider {
+        addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 MenuCompat.setGroupDividerEnabled(menu, true)
                 this@MainActivity.menu = menu
@@ -261,8 +260,7 @@ class MainActivity : DaggerAppCompatActivityWithResult() {
                     else                        ->
                         actionBarDrawerToggle.onOptionsItemSelected(menuItem)
                 }
-        }
-        mainMenuProvider?.let { addMenuProvider(it) }
+        })
         // Setup views on 2nd and next activity start
         // On 1st start app is still initializing, start() is delayed and run from EventAppInitialized
         if (config.appInitialized) setupViews()
@@ -338,9 +336,6 @@ class MainActivity : DaggerAppCompatActivityWithResult() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mainPager.adapter = null
-        binding.mainDrawerLayout.removeDrawerListener(actionBarDrawerToggle)
-        mainMenuProvider?.let { removeMenuProvider(it) }
         disposable.clear()
     }
 
@@ -521,7 +516,7 @@ class MainActivity : DaggerAppCompatActivityWithResult() {
                 fh.delete()
                 // Also clear any stored password
                 exportPasswordDataStore.clearPasswordDataStore(context)
-                ToastUtils.okToast(context, context.getString(app.aaps.core.ui.R.string.password_set), isShort = false)
+                ToastUtils.okToast(context, context.getString(app.aaps.core.ui.R.string.password_set))
             }.start()
         }
     }

@@ -162,7 +162,7 @@ class AutotunePlugin @Inject constructor(
         tunedProfile = atProfileProvider.get().with(profile, localInsulin).also {
             it.profileName = rh.gs(R.string.autotune_tunedprofile_name)
         }
-        pumpProfile = atProfileProvider.get().with(profile, localInsulin).also {
+        atProfileProvider.get().with(profile, localInsulin).also {
             it.profileName = selectedProfile
         }
         autotuneFS.exportPumpProfile(pumpProfile)

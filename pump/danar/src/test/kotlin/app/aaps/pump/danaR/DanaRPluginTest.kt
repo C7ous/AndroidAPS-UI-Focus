@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 class DanaRPluginTest : TestBaseWithProfile() {
 
@@ -32,12 +32,12 @@ class DanaRPluginTest : TestBaseWithProfile() {
 
     @BeforeEach
     fun prepareMocks() {
-        whenever(preferences.get(DanaStringKey.MacAddress)).thenReturn("")
-        whenever(preferences.get(DanaStringKey.RName)).thenReturn("")
-        whenever(rh.gs(app.aaps.core.ui.R.string.pumplimit)).thenReturn("pump limit")
-        whenever(rh.gs(app.aaps.core.ui.R.string.itmustbepositivevalue)).thenReturn("it must be positive value")
-        whenever(rh.gs(app.aaps.core.ui.R.string.limitingbasalratio)).thenReturn("Limiting max basal rate to %1\$.2f U/h because of %2\$s")
-        whenever(rh.gs(app.aaps.core.ui.R.string.limitingpercentrate)).thenReturn("Limiting max percent rate to %1\$d%% because of %2\$s")
+        `when`(preferences.get(DanaStringKey.MacAddress)).thenReturn("")
+        `when`(preferences.get(DanaStringKey.RName)).thenReturn("")
+        `when`(rh.gs(app.aaps.core.ui.R.string.pumplimit)).thenReturn("pump limit")
+        `when`(rh.gs(app.aaps.core.ui.R.string.itmustbepositivevalue)).thenReturn("it must be positive value")
+        `when`(rh.gs(app.aaps.core.ui.R.string.limitingbasalratio)).thenReturn("Limiting max basal rate to %1\$.2f U/h because of %2\$s")
+        `when`(rh.gs(app.aaps.core.ui.R.string.limitingpercentrate)).thenReturn("Limiting max percent rate to %1\$d%% because of %2\$s")
         danaPump = DanaPump(aapsLogger, preferences, dateUtil, decimalFormatter, profileStoreProvider)
         danaRPlugin = DanaRPlugin(
             aapsLogger, rh, preferences, commandQueue, aapsSchedulers, rxBus, context, constraintChecker, activePlugin, danaPump, dateUtil, fabricPrivacy, pumpSync,
@@ -47,8 +47,8 @@ class DanaRPluginTest : TestBaseWithProfile() {
 
     @Test @Throws(Exception::class)
     fun basalRateShouldBeLimited() {
-        danaRPlugin.setPluginEnabledBlocking(PluginType.PUMP, true)
-        danaRPlugin.setPluginEnabledBlocking(PluginType.PUMP, true)
+        danaRPlugin.setPluginEnabled(PluginType.PUMP, true)
+        danaRPlugin.setPluginEnabled(PluginType.PUMP, true)
         danaPump.maxBasal = 0.8
         val c = ConstraintObject(Double.MAX_VALUE, aapsLogger)
         danaRPlugin.applyBasalConstraints(c, validProfile)
@@ -59,8 +59,8 @@ class DanaRPluginTest : TestBaseWithProfile() {
 
     @Test @Throws(Exception::class)
     fun percentBasalRateShouldBeLimited() {
-        danaRPlugin.setPluginEnabledBlocking(PluginType.PUMP, true)
-        danaRPlugin.setPluginEnabledBlocking(PluginType.PUMP, true)
+        danaRPlugin.setPluginEnabled(PluginType.PUMP, true)
+        danaRPlugin.setPluginEnabled(PluginType.PUMP, true)
         danaPump.maxBasal = 0.8
         val c = ConstraintObject(Int.MAX_VALUE, aapsLogger)
         danaRPlugin.applyBasalPercentConstraints(c, validProfile)

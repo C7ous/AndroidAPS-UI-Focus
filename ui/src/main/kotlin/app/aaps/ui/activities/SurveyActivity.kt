@@ -109,13 +109,6 @@ class SurveyActivity : TranslatedDaggerAppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.spinner.adapter = null
-        binding.profile.setOnClickListener(null)
-        binding.submit.setOnClickListener(null)
-    }
-
     inner class FirebaseRecord {
 
         var id = ""

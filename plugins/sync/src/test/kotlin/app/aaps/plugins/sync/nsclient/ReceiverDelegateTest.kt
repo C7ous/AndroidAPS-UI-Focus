@@ -13,7 +13,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 class ReceiverDelegateTest : TestBase() {
 
@@ -32,29 +32,29 @@ class ReceiverDelegateTest : TestBase() {
 
     @Test
     fun testCalculateStatusChargingState() {
-        whenever(preferences.get(BooleanKey.NsClientUseOnBattery)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseOnCharging)).thenReturn(false)
+        `when`(preferences.get(BooleanKey.NsClientUseOnBattery)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseOnCharging)).thenReturn(false)
         assertThat(sut.calculateStatus(EventChargingState(false, 0))).isTrue()
         assertThat(sut.calculateStatus(EventChargingState(true, 0))).isFalse()
-        whenever(preferences.get(BooleanKey.NsClientUseOnBattery)).thenReturn(false)
-        whenever(preferences.get(BooleanKey.NsClientUseOnCharging)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseOnBattery)).thenReturn(false)
+        `when`(preferences.get(BooleanKey.NsClientUseOnCharging)).thenReturn(true)
         assertThat(sut.calculateStatus(EventChargingState(true, 0))).isTrue()
         assertThat(sut.calculateStatus(EventChargingState(false, 0))).isFalse()
     }
 
     @Test
     fun testCalculateStatusNetworkState() {
-        whenever(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
-        whenever(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
+        `when`(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
+        `when`(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, wifiConnected = false, roaming = true))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, wifiConnected = false, roaming = false))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange(ssid = "<unknown ssid>", mobileConnected = true, wifiConnected = true))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange(ssid = "<unknown ssid>", mobileConnected = false, wifiConnected = true))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange())).isFalse()
 
-        whenever(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("test 1")
+        `when`(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("test 1")
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, wifiConnected = false, roaming = true))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, wifiConnected = false, roaming = false))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange(ssid = "<unknown ssid>", mobileConnected = true, wifiConnected = true))).isTrue()
@@ -63,25 +63,25 @@ class ReceiverDelegateTest : TestBase() {
         assertThat(sut.calculateStatus(EventNetworkChange(ssid = "test 1", mobileConnected = false, wifiConnected = true))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange())).isFalse()
 
-        whenever(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(false)
-        whenever(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(true)
-        whenever(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
+        `when`(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(false)
+        `when`(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(true)
+        `when`(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
         assertThat(sut.calculateStatus(EventNetworkChange(wifiConnected = true))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange())).isFalse()
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true))).isFalse()
 
-        whenever(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(false)
-        whenever(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
+        `when`(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(false)
+        `when`(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, roaming = false))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, roaming = true))).isFalse()
 
-        whenever(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
-        whenever(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(true)
-        whenever(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
+        `when`(preferences.get(BooleanKey.NsClientUseCellular)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseWifi)).thenReturn(true)
+        `when`(preferences.get(BooleanKey.NsClientUseRoaming)).thenReturn(true)
+        `when`(preferences.get(StringKey.NsClientWifiSsids)).thenReturn("")
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, roaming = false))).isTrue()
         assertThat(sut.calculateStatus(EventNetworkChange(mobileConnected = true, roaming = true))).isTrue()
     }

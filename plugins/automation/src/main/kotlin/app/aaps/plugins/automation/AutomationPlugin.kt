@@ -8,6 +8,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import app.aaps.core.data.model.GlucoseUnit
+import app.aaps.core.data.model.RM
 import app.aaps.core.data.plugin.PluginType
 import app.aaps.core.data.pump.defs.PumpType
 import app.aaps.core.data.time.T
@@ -198,8 +199,7 @@ class AutomationPlugin @Inject constructor(
 
     override fun onStop() {
         disposable.clear()
-        handler?.removeCallbacksAndMessages(null)
-        handler?.looper?.quit()
+        handler?.removeCallbacks(refreshLoop)
         handler = null
         locationServiceHelper.stopService(context)
         super.onStop()

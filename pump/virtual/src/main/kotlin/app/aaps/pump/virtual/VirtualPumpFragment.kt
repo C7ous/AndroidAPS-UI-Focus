@@ -109,12 +109,6 @@ class VirtualPumpFragment : DaggerFragment() {
         _binding = null
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
-    }
-
     @Synchronized
     private fun updateGui() {
         if (_binding == null) return

@@ -97,12 +97,6 @@ class PairingProgressDialog : DaggerDialogFragment() {
         handler.removeCallbacksAndMessages(null)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -83,7 +83,6 @@ class SignatureVerifierPlugin @Inject constructor(
 
     override fun onStop() {
         handler?.removeCallbacksAndMessages(null)
-        handler?.looper?.quit()
         handler = null
         super.onStop()
     }

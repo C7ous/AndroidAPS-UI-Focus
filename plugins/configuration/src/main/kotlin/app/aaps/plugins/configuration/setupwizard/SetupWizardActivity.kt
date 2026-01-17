@@ -43,7 +43,6 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
     private val disposable = CompositeDisposable()
     private lateinit var screens: List<SWScreen>
     private var currentWizardPage = 0
-    private var setupWizardMenuProvider: MenuProvider? = null
 
     private val intentMessage = "WIZZARDPAGE"
 
@@ -72,7 +71,7 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
                 }
             }
         })
-        setupWizardMenuProvider = object : MenuProvider {
+        addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {}
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
@@ -85,8 +84,7 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
 
                     else              -> false
                 }
-        }
-        setupWizardMenuProvider?.let { addMenuProvider(it) }
+        })
         binding.nextButton.setOnClickListener { currentWizardPage = nextPage(); prepareLayout() }
         binding.previousButton.setOnClickListener { currentWizardPage = previousPage(); prepareLayout() }
         binding.finishButton.setOnClickListener { finishSetupWizard() }
@@ -94,10 +92,6 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.nextButton.setOnClickListener(null)
-        binding.previousButton.setOnClickListener(null)
-        binding.finishButton.setOnClickListener(null)
-        setupWizardMenuProvider?.let { removeMenuProvider(it) }
         swDefinition.activity = null
     }
 

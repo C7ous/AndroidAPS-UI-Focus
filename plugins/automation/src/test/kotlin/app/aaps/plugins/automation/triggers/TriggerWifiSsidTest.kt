@@ -7,14 +7,14 @@ import com.google.common.truth.Truth.assertThat
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 
 class TriggerWifiSsidTest : TriggerTestBase() {
 
     @Test fun shouldRunTest() {
         val e = EventNetworkChange()
-        whenever(receiverStatusStore.lastNetworkEvent).thenReturn(e)
+        `when`(receiverStatusStore.lastNetworkEvent).thenReturn(e)
         var t: TriggerWifiSsid = TriggerWifiSsid(injector).setValue("aSSID 1").comparator(Comparator.Compare.IS_EQUAL)
         e.wifiConnected = false
         assertThat(t.shouldRun()).isFalse()
@@ -29,7 +29,7 @@ class TriggerWifiSsidTest : TriggerTestBase() {
         assertThat(t.shouldRun()).isTrue()
 
         // no network data
-        whenever(receiverStatusStore.lastNetworkEvent).thenReturn(null)
+        `when`(receiverStatusStore.lastNetworkEvent).thenReturn(null)
         assertThat(t.shouldRun()).isFalse()
     }
 

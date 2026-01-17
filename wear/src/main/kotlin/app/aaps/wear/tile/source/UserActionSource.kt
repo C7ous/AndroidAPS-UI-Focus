@@ -20,18 +20,18 @@ class UserActionSource @Inject constructor(private val context: Context, private
         val userList = mutableListOf<Action>()
         val userMap = getUserActionData(sp)
 
-        for (userAction in userMap.entries) {
+        for (useraction in userMap.entries) {
             if (userList.size < 4) {
                 userList.add(
                     Action(
-                        buttonText = userAction.title,
+                        buttonText = useraction.title,
                         iconRes = R.drawable.ic_user_options,
                         activityClass = BackgroundActionActivity::class.java.name,
-                        action = EventData.ActionUserActionPreCheck(userAction.id, userAction.title),
+                        action = EventData.ActionUserActionPreCheck(useraction.id, useraction.title),
                         message = context.resources.getString(R.string.action_user_action_confirmation)
                     )
                 )
-                aapsLogger.info(LTag.WEAR, """getSelectedActions: active ${userAction.title} guid=${userAction.id}""")
+                aapsLogger.info(LTag.WEAR, """getSelectedActions: active ${useraction.title} guid=${useraction.id}""")
             }
         }
         return userList

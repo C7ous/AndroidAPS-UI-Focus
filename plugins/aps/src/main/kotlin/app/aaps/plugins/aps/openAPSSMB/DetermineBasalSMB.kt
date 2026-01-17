@@ -1,6 +1,5 @@
 package app.aaps.plugins.aps.openAPSSMB
 
-import app.aaps.core.data.configuration.Constants
 import app.aaps.core.interfaces.aps.APSResult
 import app.aaps.core.interfaces.aps.AutosensResult
 import app.aaps.core.interfaces.aps.CurrentTemp
@@ -68,7 +67,7 @@ class DetermineBasalSMB @Inject constructor(
         if (!microBolusAllowed) {
             consoleError.add("SMB disabled (!microBolusAllowed)")
             return false
-        } else if (!profile.allowSMB_with_high_temptarget && profile.temptargetSet && target_bg > Constants.ALLOW_SMB_WITH_HIGH_TT) {
+        } else if (!profile.allowSMB_with_high_temptarget && profile.temptargetSet && target_bg > 100) {
             consoleError.add("SMB disabled due to high temptarget of $target_bg")
             return false
         }

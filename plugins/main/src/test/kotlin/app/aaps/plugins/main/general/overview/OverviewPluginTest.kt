@@ -4,7 +4,6 @@ import android.app.Activity
 import app.aaps.core.interfaces.nsclient.NSSettingsStatus
 import app.aaps.core.interfaces.overview.OverviewData
 import app.aaps.core.interfaces.overview.OverviewMenus
-import app.aaps.core.interfaces.plugin.ActivePlugin
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.plugins.main.general.overview.notifications.NotificationStore
 import app.aaps.shared.tests.TestBaseWithProfile
@@ -12,7 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 class OverviewPluginTest : TestBaseWithProfile() {
 
@@ -27,9 +26,9 @@ class OverviewPluginTest : TestBaseWithProfile() {
     @BeforeEach fun prepare() {
         overviewPlugin = OverviewPlugin(
             aapsLogger, rh, preferences, notificationStore, fabricPrivacy, rxBus,
-            aapsSchedulers, overviewData, overviewMenus, context, constraintsChecker, uiInteraction, nsSettingsStatus, config, activePlugin
+            aapsSchedulers, overviewData, overviewMenus, context, constraintsChecker, uiInteraction, nsSettingsStatus, config
         )
-        whenever(uiInteraction.quickWizardListActivity).thenReturn(Activity::class.java)
+        Mockito.`when`(uiInteraction.quickWizardListActivity).thenReturn(Activity::class.java)
     }
 
     @Test

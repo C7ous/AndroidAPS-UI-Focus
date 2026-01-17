@@ -24,9 +24,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 class CarbTimerImplTest : TestBase() {
 
@@ -55,8 +53,8 @@ class CarbTimerImplTest : TestBase() {
     private lateinit var automationPlugin: AutomationPlugin
 
     @BeforeEach fun init() {
-        whenever(rh.gs(anyInt())).thenReturn("")
-        whenever(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
+        Mockito.`when`(rh.gs(anyInt())).thenReturn("")
+        Mockito.`when`(profileFunction.getUnits()).thenReturn(GlucoseUnit.MGDL)
         dateUtil = DateUtilImpl(context)
         timerUtil = TimerUtil(context)
         automationPlugin = AutomationPlugin(
@@ -72,6 +70,6 @@ class CarbTimerImplTest : TestBase() {
         assertThat(automationPlugin.size()).isEqualTo(0)
 
         automationPlugin.scheduleTimeToEatReminder(1)
-        verify(context, times(1)).startActivity(any())
+        Mockito.verify(context, Mockito.times(1)).startActivity(any())
     }
 }

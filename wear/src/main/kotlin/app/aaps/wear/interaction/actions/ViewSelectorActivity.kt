@@ -1,27 +1,26 @@
+@file:Suppress("DEPRECATION")
+
 package app.aaps.wear.interaction.actions
 
 import android.content.Context
 import android.os.Bundle
+import android.support.wearable.view.GridViewPager
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
 import androidx.wear.widget.CurvedTextView
-import androidx.wear.widget.WearableRecyclerView
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.sharedPreferences.SP
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.wear.R
-import app.aaps.wear.widgets.PagerAdapter
-import app.aaps.wear.widgets.SimplePageIndicator
+import app.aaps.wear.nondeprecated.DotsPageIndicatorNonDeprecated
+import app.aaps.wear.nondeprecated.GridPagerAdapterNonDeprecated
+import app.aaps.wear.nondeprecated.GridViewPagerNonDeprecated
 import dagger.android.DaggerActivity
 import javax.inject.Inject
 
 /**
- * Base activity for horizontal paging actions using WearableRecyclerView.
- * Replaces deprecated GridViewPager with modern AndroidX components.
+ * Created by adrian on 13/02/17.
  */
 open class ViewSelectorActivity : DaggerActivity() {
 
@@ -29,57 +28,33 @@ open class ViewSelectorActivity : DaggerActivity() {
     @Inject lateinit var preferences: Preferences
     @Inject lateinit var rxBus: RxBus
 
-    private var pager: WearableRecyclerView? = null
-    private var pageIndicator: SimplePageIndicator? = null
+    private var pager: GridViewPagerNonDeprecated? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pager)
+        setContentView(R.layout.grid_layout)
         setTitleBasedOnScreenShape()
-
         pager = findViewById(R.id.pager)
-        pageIndicator = findViewById(R.id.page_indicator)
+        val dotsPageIndicator: DotsPageIndicatorNonDeprecated = findViewById(R.id.page_indicator)
+        dotsPageIndicator.setPager(pager)
+        pager?.setOnPageChangeListener(object : GridViewPager.OnPageChangeListener {
+            override fun onPageScrolled(row: Int, column: Int, rowOffset: Float, columnOffset: Float, rowOffsetPixels: Int, columnOffsetPixels: Int) {
+                dotsPageIndicator.onPageScrolled(row, column, rowOffset, columnOffset, rowOffsetPixels, columnOffsetPixels)
+            }
 
-        // Setup horizontal paging with snap behavior
-        pager?.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            isEdgeItemsCenteringEnabled = false
-            isCircularScrollingGestureEnabled = false
-        }
+            override fun onPageSelected(row: Int, column: Int) {
+                dotsPageIndicator.onPageSelected(row, column)
+                pager?.getChildAt(column)?.requestFocus()
+            }
 
-        // Attach snap helper for page-snapping behavior
-        val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(pager)
-
-        // Listen for page changes to update indicator
-        pager?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    updatePageIndicator()
-                }
+            override fun onPageScrollStateChanged(state: Int) {
+                dotsPageIndicator.onPageScrollStateChanged(state)
             }
         })
     }
 
-    fun setAdapter(adapter: PagerAdapter?) {
+    fun setAdapter(adapter: GridPagerAdapterNonDeprecated?) {
         pager?.adapter = adapter
-        adapter?.let {
-            pageIndicator?.setPageCount(it.getPageCount())
-            updatePageIndicator()
-        }
-    }
-
-    private fun updatePageIndicator() {
-        val layoutManager = pager?.layoutManager as? LinearLayoutManager
-        val currentPosition = layoutManager?.findFirstCompletelyVisibleItemPosition() ?: 0
-        if (currentPosition >= 0) {
-            pageIndicator?.setCurrentPage(currentPosition)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        pager?.adapter = null
     }
 
     private fun setTitleBasedOnScreenShape() {
@@ -100,6 +75,6 @@ open class ViewSelectorActivity : DaggerActivity() {
     }
 
     fun showToast(context: Context?, text: Int) {
-        Toast.makeText(context, getString(text), Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, getString(text), Toast.LENGTH_LONG).show()
     }
 }

@@ -1,6 +1,6 @@
 package app.aaps.core.interfaces.rx.events
 
 /**
- * Fired to update the main loop GUI.
+ * Created by mike on 05.08.2016.
  */
 class EventLoopUpdateGui : EventUpdateGui()

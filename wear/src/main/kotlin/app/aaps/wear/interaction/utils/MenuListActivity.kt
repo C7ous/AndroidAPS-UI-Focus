@@ -48,14 +48,13 @@ abstract class MenuListActivity : DaggerActivity() {
         disposable += rxBus
             .toObservable(EventUpdateSelectedWatchface::class.java)
             .observeOn(aapsSchedulers.main)
-            .subscribe { _: EventUpdateSelectedWatchface ->
+            .subscribe { event: EventUpdateSelectedWatchface ->
                 updateMenu()
             }
         updateMenu()
     }
 
     override fun onDestroy() {
-        findViewById<WearableRecyclerView>(R.id.action_list)?.adapter = null
         disposable.clear()
         super.onDestroy()
     }

@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito
 
 class DanaRsPacketBolusSetStepBolusStartTest : DanaRSTestBase() {
 
@@ -30,6 +29,6 @@ class DanaRsPacketBolusSetStepBolusStartTest : DanaRSTestBase() {
 
     @BeforeEach
     fun mock() {
-        whenever(constraintChecker.applyBolusConstraints(anyOrNull())).thenReturn(ConstraintObject(0.0, aapsLogger))
+        Mockito.`when`(constraintChecker.applyBolusConstraints(anyObject())).thenReturn(ConstraintObject(0.0, aapsLogger))
     }
 }

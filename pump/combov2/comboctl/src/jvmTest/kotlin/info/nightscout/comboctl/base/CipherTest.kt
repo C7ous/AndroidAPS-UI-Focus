@@ -1,11 +1,10 @@
 package info.nightscout.comboctl.base
 
-import app.aaps.shared.tests.TestBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.text.Charsets
 
-class CipherTest : TestBase() {
-
+class CipherTest {
     @Test
     fun checkWeakKeyGeneration() {
         // Generate a weak key out of the PIN 012-345-6789.

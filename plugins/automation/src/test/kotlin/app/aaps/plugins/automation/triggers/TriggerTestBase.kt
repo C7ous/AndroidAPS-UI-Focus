@@ -8,7 +8,7 @@ import app.aaps.plugins.automation.services.LastLocationDataContainer
 import app.aaps.shared.tests.TestBaseWithProfile
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mock
-import org.mockito.kotlin.whenever
+import org.mockito.Mockito.`when`
 
 open class TriggerTestBase : TestBaseWithProfile() {
 
@@ -20,7 +20,7 @@ open class TriggerTestBase : TestBaseWithProfile() {
 
     @BeforeEach
     fun prepareMock1() {
-        whenever(iobCobCalculator.ads).thenReturn(autosensDataStore)
+        `when`(iobCobCalculator.ads).thenReturn(autosensDataStore)
     }
 
     init {

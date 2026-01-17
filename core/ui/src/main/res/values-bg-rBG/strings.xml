@@ -546,5 +546,4 @@
     <string name="sunday_short">Н</string>
     <!--    DecimalFormatterImpl -->
     <string name="format_insulin_units">%1$.2fЕ</string>
-    <!--    Playback-->
 </resources>

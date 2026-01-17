@@ -90,6 +90,7 @@ class XdripFragment : DaggerFragment(), MenuProvider, PluginFragment {
             else              -> false
         }
 
+    @Synchronized
     override fun onResume() {
         super.onResume()
         disposable += rxBus
@@ -99,21 +100,10 @@ class XdripFragment : DaggerFragment(), MenuProvider, PluginFragment {
         updateGui()
     }
 
-    override fun onPause() {
+    @Synchronized override fun onPause() {
         super.onPause()
         disposable.clear()
         handler.removeCallbacksAndMessages(null)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun updateGui() {

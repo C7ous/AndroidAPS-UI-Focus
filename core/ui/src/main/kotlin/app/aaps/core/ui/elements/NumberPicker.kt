@@ -14,6 +14,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.View.OnTouchListener
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
@@ -51,7 +52,7 @@ open class NumberPicker(context: Context, attrs: AttributeSet? = null) : LinearL
     private var mCustomContentDescription: String? = null
     protected lateinit var binding: NumberPickerViewAdapter
 
-    private var handler: Handler = Handler(Looper.getMainLooper(), Handler.Callback { msg: Message ->
+    private var mHandler: Handler = Handler(Looper.getMainLooper(), Handler.Callback { msg: Message ->
         when (msg.what) {
             MSG_INC -> {
                 inc(msg.arg1)
@@ -97,7 +98,7 @@ open class NumberPicker(context: Context, attrs: AttributeSet? = null) : LinearL
             } else {
                 msg.what = MSG_DEC
             }
-            handler.sendMessage(msg)
+            mHandler.sendMessage(msg)
         }
     }
 
@@ -295,16 +296,10 @@ open class NumberPicker(context: Context, attrs: AttributeSet? = null) : LinearL
             return
         }
         mUpdater = Executors.newSingleThreadScheduledExecutor()
-        mUpdater?.scheduleWithFixedDelay(
+        mUpdater?.scheduleAtFixedRate(
             UpdateCounterTask(inc), 200, 200,
             TimeUnit.MILLISECONDS
         )
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        stopUpdating()
-        handler.removeCallbacksAndMessages(null)
     }
 
     private fun stopUpdating() {
