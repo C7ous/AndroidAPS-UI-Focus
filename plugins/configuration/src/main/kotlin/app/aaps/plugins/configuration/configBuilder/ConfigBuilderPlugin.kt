@@ -282,10 +282,7 @@ class ConfigBuilderPlugin @Inject constructor(
         val pluginsAdded = ArrayList<PluginViewHolder>()
 
         if (title != null) layout.categoryTitle.text = rh.gs(title)
-        else {
-            layout.categoryTitle.visibility = View.GONE
-            layout.header.background = null
-        }
+        else layout.categoryTitle.visibility = View.GONE
         layout.categoryVisibility.visibility = preferences.simpleMode.not().toVisibility()
         layout.categoryDescription.text = rh.gs(description)
         (layout.categoryExpandMore.background as AnimationDrawable).let { expandAnimation ->

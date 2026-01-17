@@ -23,6 +23,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.text.toSpanned
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.aaps.core.data.aps.SMBDefaults
 import app.aaps.core.data.configuration.Constants
 import app.aaps.core.data.model.GlucoseUnit
 import app.aaps.core.data.model.RM
@@ -260,8 +261,36 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         binding.buttonsLayout.quickWizardButton.setOnLongClickListener(this)
         binding.infoLayout.apsMode.setOnClickListener(this)
         binding.infoLayout.apsMode.setOnLongClickListener(this)
+
+// Mod exercise mode toggle icon
+
+        binding.exerciseModeCheckboxIcon.setOnClickListener {
+            // Get current state of exercise mode from SMBDefaults
+            val exerciseMode = SMBDefaults.exercise_mode
+
+            if (exerciseMode) {
+                // If exercise mode is enabled, disable it
+                binding.exerciseModeCheckboxIcon.setImageResource(R.drawable.exerciseinactive)
+                binding.exerciseModeCheckboxIcon.setBackgroundResource(app.aaps.core.ui.R.color.ribbonDefault)
+
+                // Disable exercise mode
+                SMBDefaults.exercise_mode = false
+
+            } else {
+                // If exercise mode is disabled, enable it
+                binding.exerciseModeCheckboxIcon.setImageResource(R.drawable.exercise)
+                binding.exerciseModeCheckboxIcon.setBackgroundResource(app.aaps.core.ui.R.color.ribbonWarning)
+
+                // Enable exercise mode
+                SMBDefaults.exercise_mode = true
+
+            }
+        }
     }
 
+ // End mod
+
+    @Synchronized
     override fun onPause() {
         super.onPause()
         disposable.clear()
@@ -798,8 +827,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             // rebuild needed
             secondaryGraphs.clear()
             secondaryGraphsLabel.clear()
-            binding.graphsLayout.secondaryGraphs.removeAllViews()
-            (1 until numOfGraphs).forEach { _ ->
+            binding.graphsLayout.iobGraph.removeAllViews()
+            (1 until numOfGraphs).forEach {
                 val relativeLayout = RelativeLayout(context)
                 relativeLayout.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -822,7 +851,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                 relativeLayout.addView(label)
                 secondaryGraphsLabel.add(label)
 
-                binding.graphsLayout.secondaryGraphs.addView(relativeLayout)
+                binding.graphsLayout.iobGraph.addView(relativeLayout)
                 secondaryGraphs.add(graph)
             }
         }
